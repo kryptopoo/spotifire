@@ -1,11 +1,12 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DomSanitizer } from '@angular/platform-browser';
 import * as id3 from 'id3js';
 import { Subject } from 'rxjs';
+import { AppConstants } from '../app.constants';
 import { FileHelper, SelectInputFile } from '../app.helper';
 import { ProgressDialogData } from '../dialogs/progress-dialog/progress-dialog.component';
-import { Album, DatastoreService, Song } from '../services/datastore.service';
+import { Album, Artist, DatastoreService, Song } from '../services/datastore.service';
 import { DialogService } from '../services/dialog.service';
 import { Web3storageService } from '../services/web3storage.service';
 import { WalletComponent } from '../wallet/wallet.component';
@@ -16,11 +17,12 @@ import { environment } from './../../environments/environment';
     templateUrl: './upload.component.html',
     styleUrls: ['./upload.component.scss']
 })
-export class UploadComponent implements OnInit {
+export class UploadComponent implements OnInit, AfterViewInit {
     @ViewChild('walletCompoment', { static: false }) walletCompoment: WalletComponent;
 
-    walletConnected: boolean = true;
-    walletAddress: string = '0xE13336D630Bfc6292ffD631eCefCfbE6d617C07E';
+    walletAddress: string = null;
+
+    genres = AppConstants.Genres;
 
     // thumbBuffer: Buffer = null;
     album: any = {
@@ -45,12 +47,14 @@ export class UploadComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        // this._bundlrService.connection$.subscribe((isConnected: boolean) => {
-        //     this.walletConnected = isConnected;
-        // });
-        // this.walletConnected = this._bundlrService.isConnected();
+        this.walletAddress = localStorage.getItem('spotifire.wallet') ;
+    }
 
-        this._datastoreService.init();
+    
+    ngAfterViewInit(): void {
+        this.walletCompoment.connection$.subscribe((isConnected: boolean) => {
+            this.walletAddress = localStorage.getItem('spotifire.wallet');
+        });
     }
 
     async onAddAudioFileChanged(event: Event) {
@@ -112,11 +116,28 @@ export class UploadComponent implements OnInit {
         console.log('thumbCid', thumbCid);
         console.log('thumb url', thumbnailUrl);
 
+        // get artist
+        var artists = await this._datastoreService.getArtists(this.album.artist);
+        console.log('artists', artists)
+        let artist: Artist = {
+            _id: this._datastoreService.generateId(),
+            avatarUrl: '',
+            created:  Math.round(Date.now()),
+            name: this.album.artist
+        }
+        if (artists.length == 0){
+            
+            await this._datastoreService.createArtist(artist)
+        } else {
+            artist = artists[0];
+        }
+        console.log('artist', artist)
+
          // add album to orbitdb
          let newAlbum: Album = {
             _id: this._datastoreService.generateId(),
             title: this.album.title,
-            artist: this.album.artist,
+            artist: artist,
             genre: this.album.genre.toLowerCase(),
             description: this.album.description,
             thumbnailUrl: thumbnailUrl,
@@ -136,7 +157,7 @@ export class UploadComponent implements OnInit {
             let newSong: Song = {
                 _id: this._datastoreService.generateId(),
                 title: song.title,
-                artist: song.artist,
+                artist: artist,
                 genre: this.album.genre.toLowerCase(),
                 duration: song.duration,
                 audioUrl: audioUrl,
@@ -151,73 +172,6 @@ export class UploadComponent implements OnInit {
         await this._datastoreService.createAlbum(newAlbum);
 
         this._dialogService.stopProgressDialog();
-
-        // this._snackBar.open(`Uploaded album successfully`, null, { duration: 3000, panelClass: ['snackbar-success'] });
-
-        // console.log('upload', this.album);
-        // const dataBytes =
-        //     (this.thumbBuffer == null ? 0 : this.thumbBuffer.length) + this.album.songs.reduce((sum, { buffer }) => sum + buffer.length, 0);
-        // const dataUploadFee = await this._bundlrService.getPrice(dataBytes);
-        // this._dialogService.confirmDialog({ fee: dataUploadFee.toFixed(5) }).subscribe(async (confirmed) => {
-        //     if (confirmed) {
-        //         // upload album thumbnail
-        //         var thumbId = environment.defaultThumbnailId;
-        //         if (this.thumbBuffer != null) {
-        //             let rsThumbnail = await this._bundlrService.upload(this.thumbBuffer, [{ name: 'Content-Type', value: 'image' }]);
-        //             console.log('rsThumbnail', rsThumbnail.data);
-        //             thumbId = rsThumbnail.data.id;
-        //             this.log('upload-image', 'image', thumbId, '');
-        //         }
-        //         // upload album info
-        //         let rsAlbum = await this._bundlrService.upload(
-        //             Buffer.from(
-        //                 JSON.stringify({
-        //                     title: this.album.title,
-        //                     artist: this.album.artist,
-        //                     genre: this.album.genre,
-        //                     description: this.album.description,
-        //                     thumbnail: thumbId
-        //                 })
-        //             ),
-        //             [
-        //                 { name: 'Content-Type', value: 'application/json' },
-        //                 { name: 'Data-Type', value: 'album' },
-        //                 { name: 'Keyword-Title', value: this.album.title.toLowerCase() },
-        //                 { name: 'Keyword-Artist', value: this.album.artist.toLowerCase() },
-        //                 { name: 'Keyword-Genre', value: this.album.genre.toLowerCase() },
-        //                 { name: 'Title', value: this.album.title },
-        //                 { name: 'Artist', value: this.album.artist },
-        //                 { name: 'Genre', value: this.album.genre },
-        //                 { name: 'Description', value: this.album.description },
-        //                 { name: 'Thumbnail', value: thumbId }
-        //             ]
-        //         );
-        //         console.log('rsAlbum', rsAlbum.data);
-        //         this.log('upload-album', 'application/json', rsAlbum.data.id, this.album.title);
-        //         // upload album songs
-        //         for (let i = 0; i < this.album.songs.length; i++) {
-        //             let song = this.album.songs[i];
-        //             let rsSong = await this._bundlrService.upload(song.buffer, [
-        //                 { name: 'Content-Type', value: 'audio' },
-        //                 { name: 'Data-Type', value: 'song' },
-        //                 { name: 'Keyword-Title', value: song.title.toLowerCase() },
-        //                 { name: 'Keyword-Artist', value: song.artist.toLowerCase() },
-        //                 { name: 'Keyword-Genre', value: this.album.genre.toLowerCase() },
-        //                 { name: 'Title', value: song.title },
-        //                 { name: 'Artist', value: song.artist },
-        //                 { name: 'Genre', value: this.album.genre },
-        //                 { name: 'Duration', value: song.duration.toString() },
-        //                 { name: 'Thumbnail', value: thumbId },
-        //                 { name: 'Album', value: rsAlbum.data.id },
-        //                 { name: 'Album-Track', value: (i + 1).toString() }
-        //             ]);
-        //             console.log('rsSong', rsSong.data);
-        //             this.log('upload-song', 'audio', rsSong.data.id, song.title);
-        //         }
-        //         this._snackBar.open(`Uploaded album successfully`, null, { duration: 3000, panelClass: ['snackbar-success'] });
-        //         this.walletCompoment.loadWalletInfo();
-        //     }
-        // });
     }
 
     log(type: string, contentType: string, txId: string, description: string) {
@@ -234,34 +188,4 @@ export class UploadComponent implements OnInit {
     connectWallet() {
         this.walletCompoment.openConnectDialog();
     }
-
-    // getTotalPrice() {
-    //     let total: number = 0;
-    //     this.album.songs.forEach((song) => {
-    //         total += parseFloat(song.price);
-    //     });
-
-    //     return total.toFixed(5);
-    // }
-
-    // readFileAsBuffer(file: File, callback: any) {
-    //     // const reader = new FileReader();
-    //     // reader.onload = function () {
-    //     //     if (reader.result) {
-    //     //         const buffer = Buffer.from(reader.result as ArrayBuffer);
-    //     //         callback(buffer);
-    //     //     } else {
-    //     //         callback(null);
-    //     //     }
-    //     // };
-    //     // reader.readAsArrayBuffer(file);
-    // }
-
-    // readFileAsDataURL(blob: Blob, callback) {
-    //     const reader = new FileReader();
-    //     reader.onload = async (e) => {
-    //         callback(e.target.result);
-    //     };
-    //     reader.readAsDataURL(blob);
-    // }
 }

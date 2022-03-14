@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { AudioService, SongInfo, StreamInfo } from '../services/audio.service';
-import { Album, Song } from '../services/datastore.service';
+import { Album, DatastoreService, Playlist, Song } from '../services/datastore.service';
 import { DialogService } from '../services/dialog.service';
 
 export interface DataGridItem {
@@ -15,9 +15,11 @@ export interface DataGridItem {
     duration: string;
     owner: string;
     creator: string;
+    dataSource?: Song | Album | Playlist;
 
-    bindSongData?(song: Song);
-    bindAlbumData?(song: Album);
+    // bindSongData?(song: Song);
+    // bindAlbumData?(album: Album);
+    // bindPlaylistData?(playlist: Playlist);
 }
 
 export class BindDataGridItem implements DataGridItem {
@@ -30,30 +32,46 @@ export class BindDataGridItem implements DataGridItem {
     duration: string;
     owner: string;
     creator: string;
+    dataSource?: Song | Album | Playlist;
 
-    constructor() { 
+    constructor(ds: Song | Album | Playlist, type: string) {
+        this.dataSource = ds;
+        this.type = type;
+        if (this.type == 'song') this.bindSongData(this.dataSource as Song);
+        if (this.type == 'album') this.bindAlbumData(this.dataSource as Album);
+        if (this.type == 'playlist') this.bindPlaylistData(this.dataSource as Playlist);
     }
 
-    bindAlbumData(item: Album) {
+    private bindAlbumData(item: Album) {
         this.id = item._id;
         this.name = item.title;
-        this.description = item.artist;
+        this.description = item.artist.name;
         this.thumbnail = item.thumbnailUrl;
         this.creator = item.creator;
         this.owner = item.creator;
-        this.type = 'album';
+        // this.type = 'album';
     }
 
-    bindSongData(item: Song) {
+    private bindSongData(item: Song) {
         this.id = item._id;
         this.name = item.title;
-        this.description = item.artist;
+        this.description = item.artist.name;
         this.thumbnail = item.thumbnailUrl;
         this.creator = item.creator;
         this.duration = item.duration.toString();
         this.url = item.audioUrl;
         this.owner = item.creator;
-        this.type = 'song';
+        // this.type = 'song';
+    }
+
+    private bindPlaylistData(item: Playlist) {
+        this.id = item._id;
+        this.name = item.name;
+        this.description = item.description;
+        this.thumbnail = item.thumbnailUrl;
+        this.creator = item.creator;
+        this.owner = item.creator;
+        // this.type = 'playlist';
     }
 }
 
@@ -67,16 +85,19 @@ export class DataGridComponent implements OnInit {
 
     selectedItem: DataGridItem;
     playlists: Array<any> = new Array<any>();
+    walletAddress: string = '0xE13336D630Bfc6292ffD631eCefCfbE6d617C07E';
+
+
     constructor(
         private _audioService: AudioService,
         private _router: Router,
         private _dialogService: DialogService,
         private _snackBar: MatSnackBar,
-        // private _bundlrService: BundlrService
+        private _datastoreService: DatastoreService
     ) {}
 
     ngOnInit(): void {
-        this.playlists = JSON.parse(localStorage.getItem('arpomus.playlists'));
+        this.playlists = JSON.parse(localStorage.getItem('spotifire.playlists'));
     }
 
     shortAddress(address: string) {
@@ -96,7 +117,31 @@ export class DataGridComponent implements OnInit {
     }
 
     async addToPlaylist(playlist) {
-        // console.log('addToPlaylist', this.selectedItem, playlist);
+        console.log('addToPlaylist', this.selectedItem.dataSource as Song, playlist);
+
+        // await this._datastoreService.addToPlaylist({
+        //     _id: this.selectItem.id,
+        //     title: this.selectItem.name,
+        //     artist: {
+        //         _id: '',
+        //         avatarUrl: '',
+        //         name: '',
+        //         created: 0
+        //     },
+        //     audioUrl: '',
+        //     created: 0,
+        //     creator: '',
+        //     duration: 0,
+        //     genre: '',
+        //     thumbnailUrl: ''
+        // }, playlist, '')
+
+        await this._datastoreService.addToPlaylist(this.selectedItem.dataSource as Song, playlist.id, this.walletAddress);
+        this._snackBar.open(`Added "${this.selectedItem.name}" to "${playlist.name}" successfully`, null, {
+            duration: 3000,
+            panelClass: ['snackbar-success']
+        });
+
         // const dataBytes = Buffer.from('').length;
         // const dataUploadFee = await this._bundlrService.getPrice(dataBytes);
         // this._dialogService

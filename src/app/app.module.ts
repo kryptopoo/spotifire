@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -14,11 +14,11 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatMenuModule } from  '@angular/material/menu';
-import { MatDialogModule } from  '@angular/material/dialog';
-import { MatProgressBarModule } from  '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from  '@angular/material/progress-spinner';
-
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -34,49 +34,57 @@ import { DataGridComponent } from './data-grid/data-grid.component';
 import { TopNavigationComponent } from './top-navigation/top-navigation.component';
 import { TransactionLogsComponent } from './transaction-logs/transaction-logs.component';
 
-import { DatastoreService } from './services/datastore.service'
+import { DatastoreService } from './services/datastore.service';
 import { Web3storageService } from './services/web3storage.service';
 import { ConfirmDialogComponent } from './dialogs/confirm-dialog/confirm-dialog.component';
 import { ProgressDialogComponent } from './dialogs/progress-dialog/progress-dialog.component';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    SearchComponent,
-    HomeComponent,
-    WalletComponent,
-    YourLibraryComponent,
-    PlayerComponent,
-    PlaylistComponent,
-    UploadComponent,
-    DataGridComponent,
-    ConfirmDialogComponent,
-    TopNavigationComponent,
-    TransactionLogsComponent,
-    ProgressDialogComponent,
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
+export function initializeApp(datastoreService: DatastoreService) {
+    return (): Promise<any> => {
+        return datastoreService.init();
+    };
+}
 
-    MatButtonModule,
-    MatListModule,
-    MatSliderModule,
-    MatIconModule,
-    MatToolbarModule,
-    MatCardModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSnackBarModule,
-    MatMenuModule,
-    MatDialogModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-  ],
-  providers: [DatastoreService, Web3storageService],
-  bootstrap: [AppComponent],
+@NgModule({
+    declarations: [
+        AppComponent,
+        SearchComponent,
+        HomeComponent,
+        WalletComponent,
+        YourLibraryComponent,
+        PlayerComponent,
+        PlaylistComponent,
+        UploadComponent,
+        DataGridComponent,
+        ConfirmDialogComponent,
+        TopNavigationComponent,
+        TransactionLogsComponent,
+        ProgressDialogComponent
+    ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        HttpClientModule,
+
+        MatButtonModule,
+        MatListModule,
+        MatSliderModule,
+        MatIconModule,
+        MatToolbarModule,
+        MatCardModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSnackBarModule,
+        MatMenuModule,
+        MatDialogModule,
+        MatProgressBarModule,
+        MatProgressSpinnerModule,
+        MatSelectModule
+    ],
+    // providers: [Web3storageService, DatastoreService, { provide: APP_INITIALIZER, useFactory: initializeApp, deps: [DatastoreService], multi: true }],
+    providers: [Web3storageService, DatastoreService],
+    bootstrap: [AppComponent]
 })
 export class AppModule {}

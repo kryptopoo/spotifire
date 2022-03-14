@@ -62,6 +62,12 @@
                 </div>
                 <app-data-grid [items]="foundAlbums"></app-data-grid>
             </div>
+            <div class="mb-6" *ngIf="foundPlaylists.length > 0">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-semibold text-white">Playlists:</h1>
+                </div>
+                <app-data-grid [items]="foundPlaylists"></app-data-grid>
+            </div>
         </div>
 
         <div class="" *ngIf="!loading && foundAlbums.length == 0 && foundSongs.length == 0">

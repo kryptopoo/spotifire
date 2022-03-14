@@ -2,7 +2,7 @@
 <div class="w-full sticky top-0 py-4 px-6 flex items-center justify-between">
     <div class="flex items-center">
         <h1 class="text-2xl font-semibold">Upload Album</h1>
-        <div class="mx-8 text-gray-300 text-sm"  *ngIf="walletConnected">
+        <div class="mx-8 text-gray-300 text-sm"  *ngIf="walletAddress">
             <button class="hover:text-white w-full rounded py-2 flex items-center justify-start" [routerLink]="['/transaction-logs']">
                 <i class="material-icons pr-2">history</i>
                 <p>History</p>
@@ -14,7 +14,7 @@
     </div>
 </div>
 
-<div *ngIf="!walletConnected">
+<div *ngIf="!walletAddress">
     <div class="w-full mt-44 flex flex-col items-center justify-center">
         <div class="text-3xl font-semibold">Your wallet is not connected!</div>
         <button (click)="connectWallet()"
@@ -25,11 +25,11 @@
     </div>
 </div>
 
-<div *ngIf="walletConnected" class="px-4 py-3">
+<div *ngIf="walletAddress" class="px-4 py-3">
     <div class="w-3/4 ml-8 text-sm">
         <div class="flex">
             <div class="flex items-start h-52 w-52 mr-4">
-                <img [src]="album.thumbnailFile.src" class="w-full h-full shadow-md"
+                <img [src]="album.thumbnailFile.src" class="w-full h-full shadow-md hover:cursor-pointer"
                     (click)="thumbFile.click()" />
 
                 <input #thumbFile type="file" (change)="fileHelper.onFileChanged($event, album.thumbnailFile)" accept="image/*"
@@ -48,10 +48,17 @@
                         <input matInput placeholder="Artist" required [(ngModel)]="album.artist" />
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline" color="accent" class="w-1/4">
+                    <!-- <mat-form-field appearance="outline" color="accent" class="w-1/4">
                         <mat-label>Genre</mat-label>
                         <input matInput placeholder="Genre" required [(ngModel)]="album.genre" />
-                    </mat-form-field>
+                    </mat-form-field> -->
+
+                    <mat-form-field appearance="outline" color="accent" class="w-1/4">
+                        <mat-label>Genre</mat-label>
+                        <mat-select [(ngModel)]="album.genre" >
+                          <mat-option *ngFor="let genre of genres" value="{{genre.name}}">{{genre.name}}</mat-option>
+                        </mat-select>
+                      </mat-form-field>
                 </div>
                 <div>
                     <mat-form-field appearance="outline" color="accent" class="w-full">
@@ -63,7 +70,8 @@
 
             </div>
             <div class="flex items-end mb-3 ml-3">
-                <button mat-flat-button color="accent" class="w-44" (click)="upload()">
+                <button mat-flat-button color="accent" class="w-44" (click)="upload()" 
+                    [disabled]="!album.title || !album.thumbnailFile.file || !album.genre || !album.artist">
                     <i class="material-icons h-6 w-6 mr-1">cloud_upload</i>
                     Upload Album
                 </button>

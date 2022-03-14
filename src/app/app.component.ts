@@ -1,10 +1,11 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ArweaveGraphqlService } from './services/arweave-graphql.service';
-import { DataGridItem } from './data-grid/data-grid.component';
-import { DialogService } from './services/dialog.service';
+import { BindDataGridItem, DataGridItem } from './data-grid/data-grid.component';
 import { environment } from './../environments/environment';
+import { FileHelper } from './app.helper';
+import { Web3storageService } from './services/web3storage.service';
+import { DatastoreService, Playlist } from './services/datastore.service';
 
 @Component({
     selector: 'app-root',
@@ -14,18 +15,36 @@ import { environment } from './../environments/environment';
 export class AppComponent implements OnInit {
     @ViewChild('createPlaylistDialogRef') createPlaylistDialogRef: TemplateRef<any>;
 
-    walletConnected: boolean = false;
-    thumbBuffer: any = null;
-    playlist: any = { name: '', description: '' };
+    walletConnected: boolean = true;
+    walletAddress: string = '0xE13336D630Bfc6292ffD631eCefCfbE6d617C07E';
+
+    // thumbBuffer: any = null;
+    playlist: any = {
+        name: '',
+        description: '',
+        thumbnailFile: { src: '/assets/images/no-image.png', file: null }
+    };
     playlists: Array<DataGridItem> = new Array<DataGridItem>();
 
+    fileHelper: FileHelper;
+
     constructor(
+        private _fileHelper: FileHelper,
         private _dialog: MatDialog,
         private _snackBar: MatSnackBar,
-        // private _bundlrService: BundlrService,
-        private _arweaveGrapqlService: ArweaveGraphqlService,
-        private _dialogService: DialogService
-    ) {}
+        private _web3StorageService: Web3storageService,
+        private _datastoreService: DatastoreService,
+    ) {
+        this.fileHelper = _fileHelper;
+
+        // this._datastoreService.init().then(()=> { 
+        //     console.log('datastore initiated')
+        //     this._datastoreService.loadAll().then(()=> { 
+        //         console.log('datastore loaded')
+        //     });
+        // });
+        
+    }
 
     async ngOnInit() {
         // localStorage.removeItem('arpomus.playlists');
@@ -33,102 +52,57 @@ export class AppComponent implements OnInit {
         //     this.walletConnected = isConnected;
         //     this.loadPlaylists();
         // });
+
+        await this._datastoreService.init()
+        // await this._datastoreService.loadAll();
+
+        localStorage.removeItem('spotifire.playlists');
+        await this.loadPlaylists();
     }
 
     openCreatePlaylistDialog() {
         if (!this.walletConnected) return;
 
-        this.playlist = { name: '', description: '' };
+        this.playlist = {
+            name: '',
+            description: '',
+            thumbnailFile: { src: '/assets/images/no-image.png', file: null }
+        };
         this._dialog.open(this.createPlaylistDialogRef, {
             width: '35rem'
         });
     }
 
     async savePlaylist() {
-        // const dataBytes = (this.thumbBuffer == null ? 0 : this.thumbBuffer.length) + Buffer.from(JSON.stringify(this.playlist)).length;
-        // const dataUploadFee = await this._bundlrService.getPrice(dataBytes);
-        // this._dialogService.confirmDialog({ fee: dataUploadFee.toFixed(5) }).subscribe(async (confirmed) => {
-        //     if (confirmed) {
-        //         // upload thumbnail
-        //         let thumbId = environment.defaultThumbnailId;
-        //         if (this.thumbBuffer != null) {
-        //             let rsThumbnail = await this._bundlrService.upload(this.thumbBuffer, [
-        //                 { name: 'Content-Type', value: 'image' },
-        //                 { name: 'Unix-Time', value: Math.round(Date.now() / 1000).toString() }
-        //             ]);
-        //             console.log('rsThumbnail', rsThumbnail.data);
-        //             thumbId = rsThumbnail.data.id;
-        //             //tags.push({ name: 'Thumbnail', value: rsThumbnail.data.id });
-        //         }
+        const thumbCid = await this._web3StorageService.upload([this.playlist.thumbnailFile.file]);
+        const thumbnailUrl = `https://${thumbCid}.ipfs.dweb.link/${this.playlist.thumbnailFile.file.name}`;
+        console.log('thumbCid', thumbCid);
+        console.log('thumb url', thumbnailUrl);
 
-        //         let tags = [
-        //             { name: 'Content-Type', value: 'application/json' },
-        //             { name: 'Data-Type', value: 'playlist' },
-        //             { name: 'Name', value: this.playlist.name },
-        //             { name: 'Description', value: this.playlist.description },
-        //             { name: 'Thumbnail', value: thumbId }
-        //         ];
-
-        //         let rsPlaylist: any = await this._bundlrService.upload(Buffer.from(JSON.stringify(this.playlist)), tags);
-        //         console.log('rsPlaylist', rsPlaylist.data);
-
-        //         this._snackBar.open(`Playlist has been created`, null, { duration: 3000, panelClass: ['snackbar-success'] });
-        //         //this._snackBar.open(`Transaction ${rsPlaylist.data.id} has been submitted`, null, { duration: 3000, panelClass: ['snackbar-success'] });
-
-        //         this.loadPlaylists();
-        //     }
-        // });
-    }
-
-    loadPlaylists() {
-        // this.playlists = [];
-        // this._arweaveGrapqlService
-        //     .queryByTags([
-        //         { name: 'Data-Type', values: ['playlist'] },
-        //         { name: 'Creator', values: [this._bundlrService.getAddress()] }
-        //     ])
-        //     .subscribe((rs) => {
-        //         var edges: any[] = rs.data.transactions.edges;
-        //         edges.forEach((edge) => {
-        //             var dataGridItem = this._arweaveGrapqlService.bindNodeToDataGridItem(edge.node);
-        //             this.playlists.push(dataGridItem);
-        //         });
-        //         console.log('load playlists', this.playlists);
-        //         localStorage.setItem('arpomus.playlists', JSON.stringify(this.playlists));
-        //     });
-    }
-
-    onThumbFileChanged(event: Event) {
-        const target = event.target as HTMLInputElement;
-        const file: File = (target.files as FileList)[0];
-        console.log(file);
-
-        const thumbElement = document.getElementById(`playlist-thumb`);
-        this.readFileAsDataURL(file, (result) => thumbElement.setAttribute('src', result as string));
-
-        this.readFileAsBuffer(file, async (buffer) => {
-            this.thumbBuffer = buffer;
-        });
-    }
-
-    readFileAsBuffer(file: File, callback: any) {
-        // const reader = new FileReader();
-        // reader.onload = function () {
-        //     if (reader.result) {
-        //         const buffer = Buffer.from(reader.result as ArrayBuffer);
-        //         callback(buffer);
-        //     } else {
-        //         callback(null);
-        //     }
-        // };
-        // reader.readAsArrayBuffer(file);
-    }
-
-    readFileAsDataURL(blob: Blob, callback) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            callback(e.target.result);
+        var newPlaylist: Playlist = {
+            _id: this._datastoreService.generateId(),
+            name: this.playlist.name,
+            description: this.playlist.description,
+            thumbnailUrl: thumbnailUrl,
+            created: Math.round(Date.now()),
+            creator: this.walletAddress
         };
-        reader.readAsDataURL(blob);
+
+        await this._datastoreService.createPlaylist(newPlaylist);
+
+        this._snackBar.open(`Playlist has been created`, null, { duration: 3000, panelClass: ['snackbar-success'] });
+        await this.loadPlaylists();
+    }
+
+    async loadPlaylists() {
+        this.playlists = [];
+        var myPlaylists = await this._datastoreService.getPlaylists(this.walletAddress);
+        myPlaylists.forEach((item) => {
+            var dataItem = new BindDataGridItem(item, 'playlist');
+            // dataItem.bindPlaylistData(item);
+            this.playlists.push(dataItem);
+        });
+        console.log('load playlists', this.playlists);
+        localStorage.setItem('spotifire.playlists', JSON.stringify(this.playlists));
     }
 }

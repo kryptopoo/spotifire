@@ -49,15 +49,15 @@
                     <img *ngIf="playingSongId == song.id"  width="14" height="14" alt="" src="/assets/images/equaliser-animated-green.gif">
                 </div>
                 <div class="w-2/4 flex">
-                    <img [src]="song.thumbnail" class="w-10 h-10 mr-4" />
+                    <img [src]="song.thumbnailUrl" class="w-10 h-10 mr-4" />
                     
                     <div>
                         <div class="text-base" *ngIf="playingSongId != song.id">{{ song.title }}</div>
                         <div class="text-base text-green-600" *ngIf="playingSongId == song.id">{{ song.title }}</div>
-                        <div class="text-sm text-neutral-400">{{ song.artist }}</div>
+                        <div class="text-sm text-neutral-400">{{ song.artist.name }}</div>
                     </div>
                 </div>
-                <div class="flex items-center justify-center">{{ song.duration }}</div>
+                <div class="flex items-center justify-center">{{ secondsToTime(song.duration) }}</div>
             </div>
         </div>
     </div>

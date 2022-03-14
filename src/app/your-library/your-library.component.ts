@@ -1,16 +1,15 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { ArweaveGraphqlService, ArweaveGraphqlTag } from '../services/arweave-graphql.service';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { AudioService, StreamState, StreamInfo, SongInfo } from '../services/audio.service';
 import { BindDataGridItem, DataGridItem } from '../data-grid/data-grid.component';
 import { WalletComponent } from '../wallet/wallet.component';
-import { Album, DatastoreService, Song } from '../services/datastore.service';
+import { Album, DatastoreService, Playlist, Song } from '../services/datastore.service';
 
 @Component({
     selector: 'app-your-library',
     templateUrl: './your-library.component.html',
     styleUrls: ['./your-library.component.scss']
 })
-export class YourLibraryComponent implements OnInit {
+export class YourLibraryComponent implements OnInit, AfterViewInit {
     @ViewChild('walletCompoment', { static: false }) walletCompoment: WalletComponent;
     songs: Array<DataGridItem> = new Array<DataGridItem>();
     playlists: Array<DataGridItem> = new Array<DataGridItem>();
@@ -19,32 +18,28 @@ export class YourLibraryComponent implements OnInit {
     loading: boolean = false;
     state: StreamState;
     tab: string = 'songs';
-    walletConnected: boolean = true;
-    walletAddress: string = '0xE13336D630Bfc6292ffD631eCefCfbE6d617C07E';
+    walletAddress: string = null;
 
-    constructor(
-        private _datastoreService: DatastoreService,
-        private _audioService: AudioService,
-        private _arweaveGrapqlService: ArweaveGraphqlService // private _bundlrService: BundlrService
-    ) {}
+    constructor(private _datastoreService: DatastoreService, private _audioService: AudioService) {}
 
-    async ngOnInit(): Promise<void> {
-        await this._datastoreService.init();
+    ngOnInit(): void {
+        this.walletAddress = localStorage.getItem('spotifire.wallet');
 
-        // this._bundlrService.connection$.subscribe((isConnected: boolean) => {
-        //     this.walletConnected = isConnected;
-        //     this.loadAlbums();
-        //     this.loadSongs();
-        //     this.loadPlaylists();
-        // });
+        if (this.walletAddress) {
+            this.loadAlbums();
+            this.loadSongs();
+            this.loadPlaylists();
+        }
+    }
 
-        // this.walletConnected = this._bundlrService.isConnected();
-        // if (!this.walletConnected) return;
-
-        // // load data
-        this.loadAlbums();
-        this.loadSongs();
-        // this.loadPlaylists();
+    ngAfterViewInit(): void {
+        this.walletCompoment.connection$.subscribe((isConnected: boolean) => {
+            // this.walletConnected = isConnected;
+            this.walletAddress = localStorage.getItem('spotifire.wallet');
+            this.loadAlbums();
+            this.loadSongs();
+            this.loadPlaylists();
+        });
     }
 
     playSong(song: any): void {
@@ -63,100 +58,31 @@ export class YourLibraryComponent implements OnInit {
 
     loadAlbums() {
         this.loading = true;
-        this._datastoreService.getAlbums('', this.walletAddress).then((data) => {
-            console.log('albums', data);
-            data.forEach((item: Album) => {
-                var dataItem = new BindDataGridItem();
-                dataItem.bindAlbumData(item);
-                this.albums.push(dataItem);
-            });
-            this.loading = false;
+        var data = this._datastoreService.getAlbums(null, this.walletAddress);
+        data.forEach((item: Album) => {
+            var dataItem = new BindDataGridItem(item, 'album');
+            this.albums.push(dataItem);
         });
-
-
-        // this.loading = true;
-        // this._datastoreService.getSongs('', this.walletAddress).then(data => {
-        //     console.log('loadAlbums', data);
-        //     data.forEach((item: Song) => {
-        //             var dataGridItem: DataGridItem = {
-        //                 id: item._id,
-        //                 name: item.title,
-        //                 description: item.artist,
-        //                 thumbnail: item.thumbnailUrl,
-        //                 creator: item.creator,
-        //                 duration: item.duration.toString(),
-        //                 url: item.audioUrl,
-        //                 owner: item.creator,
-        //                 type: 'song'
-        //             }
-        //             this.albums.push(dataGridItem);
-        //         });
-        //     this.loading = false;
-        // });
-        // this.loading = true;
-        // // get albums
-        // this._arweaveGrapqlService
-        //     .queryByTags(
-        //         [
-        //             { name: 'Data-Type', values: ['album'] },
-        //             { name: 'Creator', values: [this._bundlrService.getAddress()] }
-        //         ],
-        //         this._bundlrService.getAddress()
-        //     )
-        //     .subscribe((rs) => {
-        //         var edges: any[] = rs.data.transactions.edges;
-        //         edges.forEach((edge) => {
-        //             var dataGridItem = this._arweaveGrapqlService.bindNodeToDataGridItem(edge.node);
-        //             this.albums.push(dataGridItem);
-        //         });
-        //         this.loading = false;
-        //     });
+        this.loading = false;
     }
 
     loadSongs() {
         this.loading = true;
-        this._datastoreService.getSongs('', this.walletAddress).then((data) => {
-            console.log('songs', data);
-            data.forEach((item: Song) => {
-                var dataItem = new BindDataGridItem();
-                dataItem.bindSongData(item);
-                this.songs.push(dataItem);
-            });
-            this.loading = false;
+        var data = this._datastoreService.getSongs('', this.walletAddress);
+        data.forEach((item: Song) => {
+            var dataItem = new BindDataGridItem(item, 'song');
+            this.songs.push(dataItem);
         });
-
-        // // get songs
-        // this.loading = true;
-        // this._arweaveGrapqlService
-        //     .queryByTags([
-        //         { name: 'Data-Type', values: ['song'] },
-        //         { name: 'Creator', values: [this._bundlrService.getAddress()] }
-        //     ])
-        //     .subscribe((rs) => {
-        //         var edges: any[] = rs.data.transactions.edges;
-        //         edges.forEach((edge) => {
-        //             var dataGridItem = this._arweaveGrapqlService.bindNodeToDataGridItem(edge.node);
-        //             this.songs.push(dataGridItem);
-        //         });
-
-        //         this.loading = false;
-        //     });
+        this.loading = false;
     }
 
     loadPlaylists() {
-        // this.loading = true;
-        // this._arweaveGrapqlService
-        //     .queryByTags([
-        //         { name: 'Data-Type', values: ['playlist'] },
-        //         { name: 'Creator', values: [this._bundlrService.getAddress()] }
-        //     ])
-        //     .subscribe((rs) => {
-        //         var edges: any[] = rs.data.transactions.edges;
-        //         edges.forEach((edge) => {
-        //             var dataGridItem = this._arweaveGrapqlService.bindNodeToDataGridItem(edge.node);
-        //             this.playlists.push(dataGridItem);
-        //         });
-        //         this.loading = false;
-        //     });
+        this.loading = true;
+        var data = this._datastoreService.getPlaylists(this.walletAddress);
+        data.forEach((item: Playlist) => {
+            var dataItem = new BindDataGridItem(item, 'playlist');
+            this.playlists.push(dataItem);
+        });
+        this.loading = false;
     }
 }

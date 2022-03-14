@@ -18,7 +18,7 @@
     style="height: 80vh">
     <mat-progress-bar mode="indeterminate" color="accent" *ngIf="loading"></mat-progress-bar>
 
-    <div *ngIf="!walletConnected">
+    <div *ngIf="!walletAddress">
         <div class="w-full mt-44 flex flex-col items-center justify-center">
             <div class="text-3xl font-semibold">Your wallet is not connected!</div>
             <button (click)="connectWallet()"
@@ -29,7 +29,7 @@
         </div>
     </div>
 
-    <div *ngIf="walletConnected">
+    <div *ngIf="walletAddress">
         <!-- songs -->
         <div class="px-6 py-3" *ngIf="tab == 'songs'">
             <div class="mb-6">
@@ -40,7 +40,7 @@
 
             <div class="w-full mt-44 flex flex-col items-center justify-center" *ngIf="songs.length == 0">
                 <div class="text-3xl font-semibold">Not Found</div>
-                <button
+                <button [routerLink]="['/upload']"
                     class="w-40 bg-neutral-100 text-neutral-900 shadow rounded-full flex items-center justify-center mt-4 p-2">
                     <i class="material-icons mr-2">cloud_upload</i>
                     Upload
