@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AppConstants } from '../app.constants';
 import { BindDataGridItem, DataGridItem } from '../data-grid/data-grid.component';
-import { DatastoreService } from '../services/datastore.service';
+
+declare var DatastoreService: any;
 
 @Component({
     selector: 'app-search',
@@ -21,7 +22,7 @@ export class SearchComponent implements OnInit {
     foundSongs: Array<DataGridItem> = new Array<DataGridItem>();
     foundPlaylists: Array<DataGridItem> = new Array<DataGridItem>();
 
-    constructor(private route: ActivatedRoute, private _datastoreService: DatastoreService) {}
+    constructor(private route: ActivatedRoute) {}
 
     ngOnInit(): void {
         this.route.queryParams.subscribe((params) => {
@@ -50,7 +51,7 @@ export class SearchComponent implements OnInit {
         this.foundSongs = [];
         this.foundPlaylists = [];
 
-        var albums = await this._datastoreService.getAlbums(this.searchGenreValue.toLowerCase(), null);
+        var albums = await DatastoreService.getAlbums(this.searchGenreValue.toLowerCase(), null);
         albums.forEach((item) => {
             var dataItem = new BindDataGridItem(item, 'album');
             this.foundAlbums.push(dataItem);
@@ -69,21 +70,21 @@ export class SearchComponent implements OnInit {
         var searchWords = this.searchTextValue.split(' ');
 
         // search album
-        var albums = this._datastoreService.searchAlbums(searchWords, searchWords);
+        var albums = DatastoreService.searchAlbums(searchWords, searchWords);
         albums.forEach((item) => {
             var dataItem = new BindDataGridItem(item, 'album');
             this.foundAlbums.push(dataItem);
         });
 
         // search songs
-        var songs = this._datastoreService.searchSongs(searchWords, searchWords);
+        var songs = DatastoreService.searchSongs(searchWords, searchWords);
         songs.forEach((item) => {
             var dataItem = new BindDataGridItem(item, 'song');
             this.foundSongs.push(dataItem);
         });
 
         // search playlists
-        var playlists = this._datastoreService.searchPlaylists(searchWords);
+        var playlists = DatastoreService.searchPlaylists(searchWords);
         playlists.forEach((item) => {
             var dataItem = new BindDataGridItem(item, 'playlist');
             this.foundPlaylists.push(dataItem);

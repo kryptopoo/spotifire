@@ -1,15 +1,13 @@
 import { Injectable } from '@angular/core';
+import { v4 as uuidv4 } from 'uuid';
 
 export function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// @Injectable({
-//     providedIn: 'root'
-// })
-// export class ImageHelper {
-
-// }
+export function generateId() {
+    return uuidv4();
+}
 
 export interface SelectInputFile {
     file: File;
@@ -48,13 +46,6 @@ export class FileHelper {
         const file: File = (target.files as FileList)[0];
         console.log(file);
         selectedFile.file = file;
-
-        // const thumbElement = document.getElementById(`thumb`);
-        // this.readFileAsDataURL(file, (result) => thumbElement.setAttribute('src', result as string));
-
-        // this.readFileAsBuffer(file, async (buffer) => {
-        //     this.thumbBuffer = buffer;
-        // });
 
         // preview image
         const reader = new FileReader();

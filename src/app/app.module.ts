@@ -34,14 +34,15 @@ import { DataGridComponent } from './data-grid/data-grid.component';
 import { TopNavigationComponent } from './top-navigation/top-navigation.component';
 import { TransactionLogsComponent } from './transaction-logs/transaction-logs.component';
 
-import { DatastoreService } from './services/datastore.service';
 import { Web3storageService } from './services/web3storage.service';
 import { ConfirmDialogComponent } from './dialogs/confirm-dialog/confirm-dialog.component';
 import { ProgressDialogComponent } from './dialogs/progress-dialog/progress-dialog.component';
 
-export function initializeApp(datastoreService: DatastoreService) {
+declare var DatastoreService: any;
+
+export function initializeApp() {
     return (): Promise<any> => {
-        return datastoreService.init();
+        return DatastoreService.initOrbitDB();
     };
 }
 
@@ -84,7 +85,9 @@ export function initializeApp(datastoreService: DatastoreService) {
         MatSelectModule
     ],
     // providers: [Web3storageService, DatastoreService, { provide: APP_INITIALIZER, useFactory: initializeApp, deps: [DatastoreService], multi: true }],
-    providers: [Web3storageService, DatastoreService],
+    // providers: [Web3storageService, DatastoreService],
+    // providers: [Web3storageService],
+    providers: [Web3storageService, { provide: APP_INITIALIZER, useFactory: initializeApp, multi: true }],
     bootstrap: [AppComponent]
 })
 export class AppModule {}

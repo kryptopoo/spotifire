@@ -1,12 +1,6 @@
 //Install express server
 const express = require('express');
 const path = require('path');
-const orbitdbInitializer = require('./orbitdb-initializer');
-
-orbitdbInitializer.initOrbitDB().then(() => {
-    console.log('initialized orbitDB')
-});
-
 
 const app = express();
 

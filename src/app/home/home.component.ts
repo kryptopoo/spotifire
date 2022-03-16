@@ -1,44 +1,47 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { BindDataGridItem, DataGridItem } from '../data-grid/data-grid.component';
-import { DatastoreService } from '../services/datastore.service';
+
+declare var DatastoreService: any;
 
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit {
     loading: boolean = false;
     songs: Array<DataGridItem> = new Array<DataGridItem>();
     playlists: Array<DataGridItem> = new Array<DataGridItem>();
     albums: Array<DataGridItem> = new Array<DataGridItem>();
 
-    constructor(private _datastoreService: DatastoreService) {}
+    constructor() {}
 
     async ngOnInit(): Promise<void> {
         this.loading = true;
 
-        // // get songs
-        // let newSongs = await this._datastoreService.getNews('song');
-        // newSongs.forEach((item) => {
-        //     var dataItem = new BindDataGridItem(item.object, 'song');
-        //     this.songs.push(dataItem);
-        // });
+        // get songs
+        let newSongs = DatastoreService.getNews('song');
+        newSongs.forEach((item) => {
+            var dataItem = new BindDataGridItem(item.object, 'song');
+            this.songs.push(dataItem);
+        });
 
-        // // get albums
-        // let newAlbums = await this._datastoreService.getNews('album');
-        // newAlbums.forEach((item) => {
-        //     var dataItem = new BindDataGridItem(item.object, 'album');
-        //     this.albums.push(dataItem);
-        // });
+        // get albums
+        let newAlbums = DatastoreService.getNews('album');
+        newAlbums.forEach((item) => {
+            var dataItem = new BindDataGridItem(item.object, 'album');
+            this.albums.push(dataItem);
+        });
 
-        // // get playlists
-        // let newPlaylists = await this._datastoreService.getNews('playlist');
-        // newPlaylists.forEach((item) => {
-        //     var dataItem = new BindDataGridItem(item.object, 'playlist');
-        //     this.playlists.push(dataItem);
-        // });
+        // get playlists
+        let newPlaylists = DatastoreService.getNews('playlist');
+        newPlaylists.forEach((item) => {
+            var dataItem = new BindDataGridItem(item.object, 'playlist');
+            this.playlists.push(dataItem);
+        });
 
         this.loading = false;
     }
+
+    async ngAfterViewInit() {}
 }

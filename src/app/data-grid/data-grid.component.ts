@@ -1,9 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { Album, Playlist, Song } from 'src/types/interfaces';
 import { AudioService, SongInfo, StreamInfo } from '../services/audio.service';
-import { Album, DatastoreService, Playlist, Song } from '../services/datastore.service';
 import { DialogService } from '../services/dialog.service';
+
+declare var DatastoreService: any;
 
 export interface DataGridItem {
     id: string;
@@ -16,10 +18,6 @@ export interface DataGridItem {
     owner: string;
     creator: string;
     dataSource?: Song | Album | Playlist;
-
-    // bindSongData?(song: Song);
-    // bindAlbumData?(album: Album);
-    // bindPlaylistData?(playlist: Playlist);
 }
 
 export class BindDataGridItem implements DataGridItem {
@@ -49,7 +47,6 @@ export class BindDataGridItem implements DataGridItem {
         this.thumbnail = item.thumbnailUrl;
         this.creator = item.creator;
         this.owner = item.creator;
-        // this.type = 'album';
     }
 
     private bindSongData(item: Song) {
@@ -61,7 +58,6 @@ export class BindDataGridItem implements DataGridItem {
         this.duration = item.duration.toString();
         this.url = item.audioUrl;
         this.owner = item.creator;
-        // this.type = 'song';
     }
 
     private bindPlaylistData(item: Playlist) {
@@ -71,7 +67,6 @@ export class BindDataGridItem implements DataGridItem {
         this.thumbnail = item.thumbnailUrl;
         this.creator = item.creator;
         this.owner = item.creator;
-        // this.type = 'playlist';
     }
 }
 
@@ -87,13 +82,11 @@ export class DataGridComponent implements OnInit {
     playlists: Array<any> = new Array<any>();
     walletAddress: string = '0xE13336D630Bfc6292ffD631eCefCfbE6d617C07E';
 
-
     constructor(
         private _audioService: AudioService,
         private _router: Router,
         private _dialogService: DialogService,
-        private _snackBar: MatSnackBar,
-        private _datastoreService: DatastoreService
+        private _snackBar: MatSnackBar
     ) {}
 
     ngOnInit(): void {
@@ -119,7 +112,7 @@ export class DataGridComponent implements OnInit {
     async addToPlaylist(playlist) {
         console.log('addToPlaylist', this.selectedItem.dataSource as Song, playlist);
 
-        // await this._datastoreService.addToPlaylist({
+        // await DatastoreService.addToPlaylist({
         //     _id: this.selectItem.id,
         //     title: this.selectItem.name,
         //     artist: {
@@ -136,7 +129,7 @@ export class DataGridComponent implements OnInit {
         //     thumbnailUrl: ''
         // }, playlist, '')
 
-        await this._datastoreService.addToPlaylist(this.selectedItem.dataSource as Song, playlist.id, this.walletAddress);
+        await DatastoreService.addToPlaylist(this.selectedItem.dataSource as Song, playlist.id, this.walletAddress);
         this._snackBar.open(`Added "${this.selectedItem.name}" to "${playlist.name}" successfully`, null, {
             duration: 3000,
             panelClass: ['snackbar-success']

@@ -1,16 +1,15 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { DomSanitizer } from '@angular/platform-browser';
-import * as id3 from 'id3js';
-import { Subject } from 'rxjs';
+import { Album, Artist, Song } from 'src/types/interfaces';
 import { AppConstants } from '../app.constants';
-import { FileHelper, SelectInputFile } from '../app.helper';
-import { ProgressDialogData } from '../dialogs/progress-dialog/progress-dialog.component';
-import { Album, Artist, DatastoreService, Song } from '../services/datastore.service';
+import { FileHelper, generateId } from '../app.helper';
 import { DialogService } from '../services/dialog.service';
 import { Web3storageService } from '../services/web3storage.service';
 import { WalletComponent } from '../wallet/wallet.component';
-import { environment } from './../../environments/environment';
+import * as id3 from 'id3js';
+import { WalletService } from '../services/wallet.service';
+
+declare var DatastoreService: any;
 
 @Component({
     selector: 'app-upload',
@@ -38,22 +37,23 @@ export class UploadComponent implements OnInit, AfterViewInit {
 
     constructor(
         private _fileHelper: FileHelper,
-        private _datastoreService: DatastoreService,
         private _web3StorageService: Web3storageService,
         private _snackBar: MatSnackBar,
-        private _dialogService: DialogService
+        private _dialogService: DialogService,
+        private _walletService: WalletService
     ) {
         this.fileHelper = _fileHelper;
     }
 
     ngOnInit(): void {
-        this.walletAddress = localStorage.getItem('spotifire.wallet') ;
+        this.walletAddress = this._walletService.getAddress();
     }
 
-    
     ngAfterViewInit(): void {
-        this.walletCompoment.connection$.subscribe((isConnected: boolean) => {
-            this.walletAddress = localStorage.getItem('spotifire.wallet');
+        this._walletService.connection$.subscribe((isConnected: boolean) => {
+            if (isConnected) {
+                this.walletAddress = this._walletService.getAddress();
+            }
         });
     }
 
@@ -101,9 +101,9 @@ export class UploadComponent implements OnInit, AfterViewInit {
     }
 
     async upload() {
-        this._dialogService.startProgressDialog( {
+        this._dialogService.startProgressDialog({
             progressMsg: 'The upload process would be taken a little time. Please wait...',
-            doneMsg: 'Done!',
+            doneMsg: 'You have uploaded successfully!',
             isProcessed: false
         });
 
@@ -112,30 +112,29 @@ export class UploadComponent implements OnInit, AfterViewInit {
 
         // upload to web3storage
         const thumbCid = await this._web3StorageService.upload([this.album.thumbnailFile.file]);
-        const thumbnailUrl =  `https://${thumbCid}.ipfs.dweb.link/${this.album.thumbnailFile.file.name}`;
+        const thumbnailUrl = `https://${thumbCid}.ipfs.dweb.link/${this.album.thumbnailFile.file.name}`;
         console.log('thumbCid', thumbCid);
         console.log('thumb url', thumbnailUrl);
 
         // get artist
-        var artists = await this._datastoreService.getArtists(this.album.artist);
-        console.log('artists', artists)
+        var artists = await DatastoreService.getArtists(this.album.artist);
+        console.log('artists', artists);
         let artist: Artist = {
-            _id: this._datastoreService.generateId(),
+            _id: generateId(),
             avatarUrl: '',
-            created:  Math.round(Date.now()),
+            created: Math.round(Date.now()),
             name: this.album.artist
-        }
-        if (artists.length == 0){
-            
-            await this._datastoreService.createArtist(artist)
+        };
+        if (artists.length == 0) {
+            await DatastoreService.createArtist(artist);
         } else {
             artist = artists[0];
         }
-        console.log('artist', artist)
+        console.log('artist', artist);
 
-         // add album to orbitdb
-         let newAlbum: Album = {
-            _id: this._datastoreService.generateId(),
+        // add album to orbitdb
+        let newAlbum: Album = {
+            _id: generateId(),
             title: this.album.title,
             artist: artist,
             genre: this.album.genre.toLowerCase(),
@@ -149,13 +148,13 @@ export class UploadComponent implements OnInit, AfterViewInit {
         for (let i = 0; i < this.album.songs.length; i++) {
             let song = this.album.songs[i];
             let audioCid = await this._web3StorageService.upload([song.audioFile.file]);
-            let audioUrl =  `https://${audioCid}.ipfs.dweb.link/${song.audioFile.file.name}`;
+            let audioUrl = `https://${audioCid}.ipfs.dweb.link/${song.audioFile.file.name}`;
             console.log('audioCid', audioCid);
             console.log('audio url', audioUrl);
 
             // add song to orbitdb
             let newSong: Song = {
-                _id: this._datastoreService.generateId(),
+                _id: generateId(),
                 title: song.title,
                 artist: artist,
                 genre: this.album.genre.toLowerCase(),
@@ -165,24 +164,13 @@ export class UploadComponent implements OnInit, AfterViewInit {
                 created: Math.round(Date.now()),
                 creator: this.walletAddress
             };
-            await this._datastoreService.createSong(newSong);
+            await DatastoreService.createSong(newSong);
             newAlbum.songs.push(newSong);
         }
 
-        await this._datastoreService.createAlbum(newAlbum);
+        await DatastoreService.createAlbum(newAlbum);
 
         this._dialogService.stopProgressDialog();
-    }
-
-    log(type: string, contentType: string, txId: string, description: string) {
-        // var transactionCollection = this._firestore.collection(`logs-${this._bundlrService.getAddress()}`);
-        // transactionCollection.add({
-        //     time: Math.round(Date.now() / 1000).toString(),
-        //     type: type,
-        //     contentType: contentType,
-        //     txId: txId,
-        //     description: description
-        // });
     }
 
     connectWallet() {

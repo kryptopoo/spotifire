@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AudioService, StreamInfo } from '../services/audio.service';
+import { Album, Playlist } from 'src/types/interfaces';
 import moment from 'moment';
-import { Album, DatastoreService, Playlist } from '../services/datastore.service';
+
+declare var DatastoreService: any;
 
 @Component({
     selector: 'app-playlist',
@@ -15,10 +17,9 @@ export class PlaylistComponent implements OnInit {
 
     playingSongId: string = null;
 
-    constructor(private route: ActivatedRoute, private _audioService: AudioService, private _datastoreService: DatastoreService) {}
+    constructor(private route: ActivatedRoute, private _audioService: AudioService) {}
 
     async ngOnInit(): Promise<void> {
-
         const id = this.route.snapshot.paramMap.get('id');
         const type = this.route.routeConfig.path.split('/')[0];
 
@@ -26,7 +27,7 @@ export class PlaylistComponent implements OnInit {
             const id = params.id;
 
             if (type == 'playlist') {
-                var playlist: Playlist = await this._datastoreService.getPlaylistById(id);
+                var playlist: Playlist = await DatastoreService.getPlaylistById(id);
                 this.playlist = {
                     title: playlist.name,
                     description: playlist.description,
@@ -39,13 +40,13 @@ export class PlaylistComponent implements OnInit {
                 };
 
                 // get songs
-                var songs = await this._datastoreService.getPlaylistSongs(id);
+                var songs = await DatastoreService.getPlaylistSongs(id);
                 this.playlist.songs = songs;
                 console.log('this.playlist', this.playlist);
             }
 
             if (type == 'album') {
-                var album: Album = await this._datastoreService.getAlbumById(id);
+                var album: Album = await DatastoreService.getAlbumById(id);
                 this.playlist = {
                     title: album.title,
                     description: album.description,

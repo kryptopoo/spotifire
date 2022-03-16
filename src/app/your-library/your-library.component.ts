@@ -1,8 +1,11 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { AudioService, StreamState, StreamInfo, SongInfo } from '../services/audio.service';
+import { AudioService, StreamState, StreamInfo } from '../services/audio.service';
 import { BindDataGridItem, DataGridItem } from '../data-grid/data-grid.component';
 import { WalletComponent } from '../wallet/wallet.component';
-import { Album, DatastoreService, Playlist, Song } from '../services/datastore.service';
+import { Album, Playlist, Song } from 'src/types/interfaces';
+import { WalletService } from '../services/wallet.service';
+
+declare var DatastoreService: any;
 
 @Component({
     selector: 'app-your-library',
@@ -20,10 +23,10 @@ export class YourLibraryComponent implements OnInit, AfterViewInit {
     tab: string = 'songs';
     walletAddress: string = null;
 
-    constructor(private _datastoreService: DatastoreService, private _audioService: AudioService) {}
+    constructor(private _audioService: AudioService, private _walletService: WalletService) {}
 
     ngOnInit(): void {
-        this.walletAddress = localStorage.getItem('spotifire.wallet');
+        this.walletAddress = this._walletService.getAddress();
 
         if (this.walletAddress) {
             this.loadAlbums();
@@ -33,12 +36,13 @@ export class YourLibraryComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.walletCompoment.connection$.subscribe((isConnected: boolean) => {
-            // this.walletConnected = isConnected;
-            this.walletAddress = localStorage.getItem('spotifire.wallet');
-            this.loadAlbums();
-            this.loadSongs();
-            this.loadPlaylists();
+        this._walletService.connection$.subscribe((isConnected: boolean) => {
+            if (isConnected) {
+                this.walletAddress = this._walletService.getAddress();
+                this.loadAlbums();
+                this.loadSongs();
+                this.loadPlaylists();
+            }
         });
     }
 
@@ -58,7 +62,7 @@ export class YourLibraryComponent implements OnInit, AfterViewInit {
 
     loadAlbums() {
         this.loading = true;
-        var data = this._datastoreService.getAlbums(null, this.walletAddress);
+        var data = DatastoreService.getAlbums(null, this.walletAddress);
         data.forEach((item: Album) => {
             var dataItem = new BindDataGridItem(item, 'album');
             this.albums.push(dataItem);
@@ -68,7 +72,7 @@ export class YourLibraryComponent implements OnInit, AfterViewInit {
 
     loadSongs() {
         this.loading = true;
-        var data = this._datastoreService.getSongs('', this.walletAddress);
+        var data = DatastoreService.getSongs('', this.walletAddress);
         data.forEach((item: Song) => {
             var dataItem = new BindDataGridItem(item, 'song');
             this.songs.push(dataItem);
@@ -78,7 +82,7 @@ export class YourLibraryComponent implements OnInit, AfterViewInit {
 
     loadPlaylists() {
         this.loading = true;
-        var data = this._datastoreService.getPlaylists(this.walletAddress);
+        var data = DatastoreService.getPlaylists(this.walletAddress);
         data.forEach((item: Playlist) => {
             var dataItem = new BindDataGridItem(item, 'playlist');
             this.playlists.push(dataItem);
