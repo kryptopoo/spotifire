@@ -86,10 +86,8 @@ export function initializeApp() {
         MatProgressSpinnerModule,
         MatSelectModule
     ],
-    // providers: [Web3storageService, DatastoreService, { provide: APP_INITIALIZER, useFactory: initializeApp, deps: [DatastoreService], multi: true }],
-    // providers: [Web3storageService, DatastoreService],
-    // providers: [Web3storageService],
-    providers: [Web3storageService, { provide: APP_INITIALIZER, useFactory: initializeApp, multi: true }],
+    providers: [Web3storageService],
+    // providers: [Web3storageService, { provide: APP_INITIALIZER, useFactory: initializeApp, multi: true }],
     bootstrap: [AppComponent]
 })
 export class AppModule {}

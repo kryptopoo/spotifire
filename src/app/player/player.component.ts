@@ -20,14 +20,7 @@ export class PlayerComponent {
         // listen to stream state
         this.audioService.getState().subscribe((state) => {
             this.state = state;
-            // if (this.state.play) {
-            //   console.log('state', state);
-            // }
         });
-
-        // let streamInfo: StreamInfo = { index: 0, songs: [{artist: 'easy', title: 'easy on me',
-        // url: 'https://bafybeifloeld7ejat2vfjp2ws4g5c4b2fclmty5c2nqeqsilraezfheshi.ipfs.dweb.link/Easy%20On%20Me.mp3', thumbnail: ''}] };
-        // this.audioService.playStream(streamInfo).subscribe((events) => {});
     }
 
     pause() {
@@ -72,7 +65,7 @@ export class PlayerComponent {
         likedSong.likedAt = Math.round(Date.now());
         var newLikedSongs = await DatastoreService.addLikeSong(this._walletService.getAddress(), likedSong);
         localStorage.setItem('spotifire.likedSongs', JSON.stringify(newLikedSongs));
-        this._snackBar.open(`Added to your liked songs`, null, { duration: 150000, panelClass: ['snackbar-info'] });
+        this._snackBar.open(`Added to your liked songs`, null, { duration: 1500, panelClass: ['snackbar-info'] });
     }
 
     async removeLikeSong() {
@@ -80,6 +73,6 @@ export class PlayerComponent {
         likedSong.liked = false;
         var newLikedSongs = await DatastoreService.removeLikeSong(this._walletService.getAddress(), likedSong);
         localStorage.setItem('spotifire.likedSongs', JSON.stringify(newLikedSongs));
-        this._snackBar.open(`Removed from your liked songs`, null, { duration: 150000, panelClass: ['snackbar-info'] });
+        this._snackBar.open(`Removed from your liked songs`, null, { duration: 1500, panelClass: ['snackbar-info'] });
     }
 }

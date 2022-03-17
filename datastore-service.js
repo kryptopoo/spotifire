@@ -1,17 +1,18 @@
-const ORBITDB_STORE_SONG = 'spotifire.songs';
-const ORBITDB_STORE_ALBUM = 'spotifire.albums';
-const ORBITDB_STORE_ARTIST = 'spotifire.artists';
-const ORBITDB_STORE_NEWS = 'spotifire.news';
-const ORBITDB_STORE_PLAYLIST = 'spotifire.playlists';
-const ORBITDB_STORE_PLAYLIST_SONG = 'spotifire.playlistsongs';
-const ORBITDB_STORE_LIKED_SONG = 'spotifire.likedsongs';
+// const ORBITDB_STORE_SONG = 'spotifire.songs';
+// const ORBITDB_STORE_ALBUM = 'spotifire.albums';
+// const ORBITDB_STORE_ARTIST = 'spotifire.artists';
+// const ORBITDB_STORE_NEWS = 'spotifire.news';
+// const ORBITDB_STORE_PLAYLIST = 'spotifire.playlists';
+// const ORBITDB_STORE_PLAYLIST_SONG = 'spotifire.playlistsongs';
+// const ORBITDB_STORE_LIKED_SONG = 'spotifire.likedsongs';
 
-// const ORBITDB_STORE_SONG = '/orbitdb/zdpuAwjSzg3dFPC9h3W3WuRLqQ1EtZ8sR8LAjMvjWQXEgZ49e/spotifire.songs';
-// const ORBITDB_STORE_ALBUM = '/orbitdb/zdpuAwzJxqjFe6Wzzvn6wfk9kvKLDGsuq14bnh31X1Rpm7UWn/spotifire.albums';
-// const ORBITDB_STORE_ARTIST = '/orbitdb/zdpuAvVJVPqaeQrQUEMCkkJcKu4o24Z3qBq9Qt4pWfK7f5pga/spotifire.artists';
-// const ORBITDB_STORE_NEWS = '/orbitdb/zdpuAxo6BkLMTWWzN843m5f7sDVS4ZeaPGTPdhJhrvkULJRp6/spotifire.news';
-// const ORBITDB_STORE_PLAYLIST = '/orbitdb/zdpuAtdLPAKCLyoZaXp9pJ2irmTot72RTgAMjsiRjcWScWHFB/spotifire.playlists';
-// const ORBITDB_STORE_PLAYLIST_SONG = '/orbitdb/zdpuAyNMGnHKTfDCCCTnjPTkmiUfEpiRyW9qgVKfTZEnXotnw/spotifire.playlistsong';
+const ORBITDB_STORE_SONG = '/orbitdb/zdpuAwjSzg3dFPC9h3W3WuRLqQ1EtZ8sR8LAjMvjWQXEgZ49e/spotifire.songs';
+const ORBITDB_STORE_ALBUM = '/orbitdb/zdpuAwzJxqjFe6Wzzvn6wfk9kvKLDGsuq14bnh31X1Rpm7UWn/spotifire.albums';
+const ORBITDB_STORE_ARTIST = '/orbitdb/zdpuAvVJVPqaeQrQUEMCkkJcKu4o24Z3qBq9Qt4pWfK7f5pga/spotifire.artists';
+const ORBITDB_STORE_NEWS = '/orbitdb/zdpuAxo6BkLMTWWzN843m5f7sDVS4ZeaPGTPdhJhrvkULJRp6/spotifire.news';
+const ORBITDB_STORE_PLAYLIST = '/orbitdb/zdpuAtdLPAKCLyoZaXp9pJ2irmTot72RTgAMjsiRjcWScWHFB/spotifire.playlists';
+const ORBITDB_STORE_PLAYLIST_SONG = '/orbitdb/zdpuAyNMGnHKTfDCCCTnjPTkmiUfEpiRyW9qgVKfTZEnXotnw/spotifire.playlistsong';
+const ORBITDB_STORE_LIKED_SONG = '/orbitdb/zdpuB112LU1Gekcx2XcPvZ6omGUS8u47myFbhLzwabxp5UNyy/spotifire.likedsongs';
 
 // # # PC
 // # songStore /orbitdb/zdpuB2gLnpgHuzftc1UAgXvwLY5HK2CUFsYGwgtFa1d5h12QA/spotifire.songs
@@ -33,7 +34,7 @@ const ipfsConfig = {
     repo: '/orbitdb/spotifire',
     start: true,
     preload: {
-        enabled: false
+        enabled: true
     },
     EXPERIMENTAL: {
         pubsub: true
@@ -50,6 +51,7 @@ const ipfsConfig = {
 };
 
 class DatastoreService {
+    ipfsId;
     songStore;
     albumStore;
     artistStore;
@@ -65,22 +67,23 @@ class DatastoreService {
             //console.log("OrbitDB", OrbitDB);
 
             const orbitdb = await OrbitDB.createInstance(ipfs);
+            this.ipfsId = orbitdb.id;
             console.log('orbitdb', orbitdb);
 
             // define stores
-            this.songStore = await orbitdb.docstore(ORBITDB_STORE_SONG, { indexBy: 'title' });
+            this.songStore = await orbitdb.docstore(ORBITDB_STORE_SONG, { sync: true, indexBy: 'title' });
             console.log('songStore', this.songStore.address.toString());
 
-            this.albumStore = await orbitdb.docstore(ORBITDB_STORE_ALBUM, { indexBy: 'title' });
+            this.albumStore = await orbitdb.docstore(ORBITDB_STORE_ALBUM, { sync: true, indexBy: 'title' });
             console.log('albumStore', this.albumStore.address.toString());
 
-            this.artistStore = await orbitdb.docstore(ORBITDB_STORE_ARTIST, { indexBy: 'name' });
+            this.artistStore = await orbitdb.docstore(ORBITDB_STORE_ARTIST, { sync: true, indexBy: 'name' });
             console.log('artistStore', this.artistStore.address.toString());
 
-            this.newsStore = await orbitdb.docstore(ORBITDB_STORE_NEWS);
+            this.newsStore = await orbitdb.docstore(ORBITDB_STORE_NEWS, { sync: true });
             console.log('newsStore', this.newsStore.address.toString());
 
-            this.playlistStore = await orbitdb.docstore(ORBITDB_STORE_PLAYLIST, { indexBy: 'name' });
+            this.playlistStore = await orbitdb.docstore(ORBITDB_STORE_PLAYLIST, { sync: true, indexBy: 'name' });
             console.log('playlistsStore', this.playlistStore.address.toString());
 
             this.playlistsongStore = await orbitdb.docstore(ORBITDB_STORE_PLAYLIST_SONG);
@@ -89,13 +92,13 @@ class DatastoreService {
             this.likedSongStore = await orbitdb.keyvalue(ORBITDB_STORE_LIKED_SONG);
             console.log('likedSongStore', this.likedSongStore.address.toString());
 
-            // // load
-            await this.albumStore.load();
-            await this.artistStore.load();
-            await this.newsStore.load();
-            await this.playlistStore.load();
-            await this.playlistsongStore.load();
-            await this.likedSongStore.load();
+            // // // load
+            // await this.albumStore.load();
+            // await this.artistStore.load();
+            // await this.newsStore.load();
+            // await this.playlistStore.load();
+            // await this.playlistsongStore.load();
+            // await this.likedSongStore.load();
 
             // get all
             await this.songStore.load();
@@ -118,9 +121,37 @@ class DatastoreService {
 
             await this.likedSongStore.load();
             console.log('all liked songs', this.likedSongStore.all);
+
+            this.logEvents(ipfs, this.likedSongStore);
         } catch (e) {
             console.log('err', e);
         }
+    }
+
+    static logEvents(ipfs, db) {
+        db.events.on('ready', async () => {
+            console.log('ready', db);
+            await this.consoleLogEvent(ipfs, db);
+        });
+        db.events.on('replicated', async() => {
+            console.log('replicated', db);
+            await this.consoleLogEvent(ipfs, db);
+        });
+        db.events.on('write', async() => {
+            console.log('write', db);
+            await this.consoleLogEvent(ipfs, db);
+        });
+        db.events.on('replicate.progress', async() => {
+            console.log('replicate.progress', db);
+            await this.consoleLogEvent(ipfs, db);
+        });
+    }
+
+    static async consoleLogEvent(ipfs, db) {
+        const networkPeers = await ipfs.swarm.peers();
+        console.log('network peers', networkPeers);
+        const databasePeers = await ipfs.pubsub.peers(db.address.toString());
+        console.log('databasePeers', databasePeers);
     }
 
     static getSongs(genre, creator) {
@@ -331,6 +362,7 @@ class DatastoreService {
     }
 
     static async addLikeSong(walletAddress, song) {
+        delete song.playing;
         var likedSongs = this.likedSongStore.get(walletAddress);
         if (likedSongs) {
             likedSongs.push(song);

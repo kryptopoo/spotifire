@@ -60,6 +60,7 @@ export class UploadComponent implements OnInit, AfterViewInit {
     async onAddAudioFileChanged(event: Event) {
         const target = event.target as HTMLInputElement;
         const file: File = (target.files as FileList)[0];
+        if (!file) return
 
         let addSong = {
             title: '',

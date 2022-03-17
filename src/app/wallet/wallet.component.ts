@@ -1,8 +1,10 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { Subject } from 'rxjs';
 import { WalletService } from '../services/wallet.service';
+import { DatastoreLoaderService } from '../services/datastore-loader.service';
+
+declare var DatastoreService: any;
 
 @Component({
     selector: 'app-wallet',
@@ -17,10 +19,22 @@ export class WalletComponent implements OnInit {
     address: string = null;
     shortAddress: string = null;
 
-    constructor(private _snackBar: MatSnackBar, private _dialog: MatDialog, private _walletService: WalletService) {}
+    ipfsId: string = null;
+
+    constructor(
+        private _snackBar: MatSnackBar,
+        private _dialog: MatDialog,
+        private _walletService: WalletService,
+        private _datastoreLoaderService: DatastoreLoaderService
+    ) {}
 
     async ngOnInit(): Promise<void> {
         await this.loadWalletInfo();
+
+        this._datastoreLoaderService.load$.subscribe(() => {
+            this.ipfsId = DatastoreService.ipfsId;
+        });
+        if (this._datastoreLoaderService.isLoaded) this.ipfsId = DatastoreService.ipfsId;
     }
 
     async connect() {

@@ -36,4 +36,10 @@ export class DialogService {
         this._progressDialogData.isProcessed = false;
         //ref.close();  
     }  
+
+    closeProgressDialog(ref: MatDialogRef<ProgressDialogComponent>){  
+        this._progressDialogData.isProcessed = false;
+        setTimeout(()=> {ref.close()}, 1000)
+         
+    } 
 }

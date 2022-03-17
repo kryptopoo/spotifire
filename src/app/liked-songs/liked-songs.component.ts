@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Playlist, Song } from 'src/types/interfaces';
 import { secondsToTime, timeToFromNow } from '../app.helper';
@@ -12,12 +12,17 @@ declare var DatastoreService: any;
     templateUrl: './liked-songs.component.html',
     styleUrls: ['./liked-songs.component.scss']
 })
-export class LikedSongsComponent implements OnInit {
-    playlist: Playlist;
+export class LikedSongsComponent implements OnInit, AfterViewInit {
+    playlist: Playlist = {
+        _id: 'liked-songs',
+        name: 'Liked Songs',
+        description: null,
+        thumbnailUrl: 'assets/images/liked-songs.png',
+        creator: '',
+        songs: []
+    };
 
-    constructor(private _audioService: AudioService, private _walletService: WalletService, private _snackBar: MatSnackBar) {}
-
-    async ngOnInit() {
+    constructor(private _audioService: AudioService, private _walletService: WalletService, private _snackBar: MatSnackBar) {
         this.playlist = {
             _id: 'liked-songs',
             name: 'Liked Songs',
@@ -26,8 +31,22 @@ export class LikedSongsComponent implements OnInit {
             creator: this._walletService.getAddress(),
             songs: []
         };
+    }
 
+    ngOnInit() {
+        
+    }
+
+    ngAfterViewInit(): void {
+        console.log('ngAfterViewInit')
+        this.clearPlaying()
         this.loadLikedSongs();
+
+        this._audioService.getState().subscribe((state) => {
+            if (!state.playing) {
+                this.clearPlaying()
+            }
+        });
     }
 
     private loadLikedSongs() {
@@ -38,21 +57,21 @@ export class LikedSongsComponent implements OnInit {
     }
 
     playSong(song: any): void {
+        this.clearPlaying();
         song.playing = true;
         let streamInfo: StreamInfo = { index: 0, songs: [song] };
         this._audioService.playStream(streamInfo).subscribe((events) => {});
     }
 
     playPlaylist(): void {
+        this.clearPlaying();
         this.playlist.songs[0].playing = true;
         let streamInfo: StreamInfo = { index: 0, songs: this.playlist.songs };
         this._audioService.playStream(streamInfo).subscribe((events) => {});
     }
 
     pause(): void {
-        this.playlist.songs.forEach((song) => {
-            song.playing = false;
-        });
+        this.clearPlaying();
         this._audioService.pause();
     }
 
@@ -64,6 +83,12 @@ export class LikedSongsComponent implements OnInit {
         return playing;
     }
 
+    clearPlaying(){
+        this.playlist.songs.forEach((song) => {
+            song.playing = false;
+        });
+    }
+
     secondsToTime(val) {
         return secondsToTime(val);
     }
@@ -72,7 +97,7 @@ export class LikedSongsComponent implements OnInit {
         likedSong.liked = false;
         var newLikedSongs = await DatastoreService.removeLikeSong(this._walletService.getAddress(), likedSong);
         localStorage.setItem('spotifire.likedSongs', JSON.stringify(newLikedSongs));
-        this._snackBar.open(`Removed from your liked songs`, null, { duration: 150000, panelClass: ['snackbar-info'] });
+        this._snackBar.open(`Removed from your liked songs`, null, { duration: 1500, panelClass: ['snackbar-info'] });
 
         this.loadLikedSongs();
     }

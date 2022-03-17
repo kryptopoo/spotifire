@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { BindDataGridItem, DataGridItem } from '../data-grid/data-grid.component';
+import { DatastoreLoaderService } from '../services/datastore-loader.service';
 
 declare var DatastoreService: any;
 
@@ -14,9 +15,18 @@ export class HomeComponent implements OnInit, AfterViewInit {
     playlists: Array<DataGridItem> = new Array<DataGridItem>();
     albums: Array<DataGridItem> = new Array<DataGridItem>();
 
-    constructor() {}
+    constructor(private _datastoreLoaderService: DatastoreLoaderService) {}
 
     async ngOnInit(): Promise<void> {
+        this._datastoreLoaderService.load$.subscribe(() => {
+            this.loadData();
+        });
+        if (this._datastoreLoaderService.isLoaded) this.loadData();
+    }
+
+    async ngAfterViewInit() {}
+
+    loadData() {
         this.loading = true;
 
         // get songs
@@ -42,6 +52,4 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
         this.loading = false;
     }
-
-    async ngAfterViewInit() {}
 }

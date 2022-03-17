@@ -7,6 +7,8 @@ import { Web3storageService } from './services/web3storage.service';
 import { WalletComponent } from './wallet/wallet.component';
 import { Playlist } from 'src/types/interfaces';
 import { WalletService } from './services/wallet.service';
+import { DialogService } from './services/dialog.service';
+import { DatastoreLoaderService } from './services/datastore-loader.service';
 
 declare var DatastoreService: any;
 
@@ -35,12 +37,27 @@ export class AppComponent implements OnInit {
         private _dialog: MatDialog,
         private _snackBar: MatSnackBar,
         private _web3StorageService: Web3storageService,
-        private _walletService: WalletService
+        private _walletService: WalletService,
+        private _dialogService: DialogService,
+        private _datastoreLoaderService: DatastoreLoaderService
     ) {
         this.fileHelper = _fileHelper;
     }
 
     async ngOnInit() {
+        await this._datastoreLoaderService.load();
+        // const progressDialog = this._dialogService.startProgressDialog({
+        //     progressMsg: 'Loading database...',
+        //     progressIcon: 'sync',
+        //     doneMsg: 'Database has been loaded successfully!',
+        //     isProcessed: false,
+        //     showDoneButton: false
+        // });
+
+        // await DatastoreService.initOrbitDB();
+
+        // this._dialogService.closeProgressDialog(progressDialog);
+
         this.walletAddress = this._walletService.getAddress();
         localStorage.removeItem('spotifire.playlists');
         await this.loadPlaylists();
@@ -105,7 +122,7 @@ export class AppComponent implements OnInit {
 
     loadLikedSongs() {
         var myLikedSongs = DatastoreService.getLikedSongs(this.walletAddress);
-        console.log('myLikedSongs', myLikedSongs)
+        console.log('myLikedSongs', myLikedSongs);
         localStorage.setItem('spotifire.likedSongs', JSON.stringify(myLikedSongs));
     }
 }

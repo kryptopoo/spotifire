@@ -13,14 +13,14 @@
             style="background: linear-gradient(transparent 0, rgba(0, 0, 0, 0.5) 100%), var(--background-noise)"></div>
         <div class="flex items-end ml-8" style="z-index: 0">
             <div>
-                <img [src]="playlist.thumbnailUrl" class="h-48 w-48 mr-4 shadow-md" />
+                <img [src]="playlist?.thumbnailUrl" class="h-48 w-48 mr-4 shadow-md" />
             </div>
             <div>
                 <div class="text-sm capitalize">Playlist</div>
                 <div class="text-6xl font-bold mt-2 mb-4">{{ playlist.name }}</div>
                 <div class="text-base">{{ playlist.description }}</div>
                 <div class="text-sm">
-                    <span class="font-semibold">{{ playlist.creator }}</span> • {{ playlist?.songs.length }} songs
+                    <span class="font-semibold">{{ playlist.creator }}</span> • {{ playlist.songs.length }} songs
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@
                         src="/assets/images/equaliser-animated-green.gif" />
                 </div>
                 <div class="w-2/4 flex">
-                    <img [src]="song.thumbnailUrl" class="w-10 h-10 mr-4" />
+                    <img [src]="song?.thumbnailUrl" class="w-10 h-10 mr-4" />
 
                     <div>
                         <div class="text-base" *ngIf="!song.playing">{{ song.title }}</div>
@@ -73,7 +73,7 @@
                     </div>
                 </div>
                 <div class="w-32 flex items-center">{{ timeToFromNow(song.likedAt) }}</div>
-                <div class="w-16 flex items-center justify-start hover:cursor-pointer">
+                <div class="w-16 flex items-center justify-end hover:cursor-pointer pr-3">
                     <i class="material-icons text-green-600" *ngIf="song.liked"
                         (click)="removeLikeSong(song)">favorite</i>
                 </div>

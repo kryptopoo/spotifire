@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AudioService, StreamInfo } from '../services/audio.service';
 import { Album, Playlist } from 'src/types/interfaces';
-import moment from 'moment';
+import { secondsToTime } from '../app.helper';
 
 declare var DatastoreService: any;
 
@@ -13,31 +13,20 @@ declare var DatastoreService: any;
 })
 export class PlaylistComponent implements OnInit {
     songs: any[];
-    playlist: any = { title: null, description: null, artist: null, thumbnail: null, creator: null, duration: 0, songs: [] };
-
-    playingSongId: string = null;
+    playlist: Playlist;
+    type: string; // Playlist | Album
 
     constructor(private route: ActivatedRoute, private _audioService: AudioService) {}
 
     async ngOnInit(): Promise<void> {
         const id = this.route.snapshot.paramMap.get('id');
-        const type = this.route.routeConfig.path.split('/')[0];
+        this.type = this.route.routeConfig.path.split('/')[0];
 
         this.route.params.subscribe(async (params) => {
             const id = params.id;
 
-            if (type == 'playlist') {
-                var playlist: Playlist = await DatastoreService.getPlaylistById(id);
-                this.playlist = {
-                    title: playlist.name,
-                    description: playlist.description,
-                    type: type,
-                    thumbnail: playlist.thumbnailUrl,
-                    songs: [],
-                    // owner: edges[0].node.owner.address,
-                    creator: playlist.creator,
-                    duration: 0
-                };
+            if (this.type == 'playlist') {
+                this.playlist = await DatastoreService.getPlaylistById(id);
 
                 // get songs
                 var songs = await DatastoreService.getPlaylistSongs(id);
@@ -45,54 +34,67 @@ export class PlaylistComponent implements OnInit {
                 console.log('this.playlist', this.playlist);
             }
 
-            if (type == 'album') {
+            if (this.type == 'album') {
                 var album: Album = await DatastoreService.getAlbumById(id);
                 this.playlist = {
-                    title: album.title,
+                    _id: album._id,
+                    name: album.title,
                     description: album.description,
-                    type: type,
-                    thumbnail: album.thumbnailUrl,
+                    thumbnailUrl: album.thumbnailUrl,
                     songs: album.songs,
-                    // owner: edges[0].node.owner.address,
-                    creator: album.creator,
-                    duration: 0
+                    creator: album.creator
                 };
 
                 console.log('this.album', this.playlist);
             }
-
-            // calculate duration
-            this.playlist.duration = this.secondsToTime(this.playlist.songs.reduce((sum, { durationValue }) => sum + parseFloat(durationValue), 0));
         });
 
         this._audioService.getState().subscribe((state) => {
             if (!state.playing) {
-                this.playingSongId = null;
+                this.clearPlaying();
             }
         });
     }
 
-    secondsToTime(val: any) {
-        var secs = val;
-        if (typeof val === 'string' || val instanceof String) secs = parseFloat(val.toString());
-
-        return moment.utc(secs * 1000).format('HH:mm:ss');
-    }
-
     playSong(song: any): void {
-        this.playingSongId = song.id;
+        this.clearPlaying();
+        song.playing = true;
         let streamInfo: StreamInfo = { index: 0, songs: [song] };
         this._audioService.playStream(streamInfo).subscribe((events) => {});
     }
 
     playPlaylist(): void {
-        this.playingSongId = this.playlist.songs[0].id;
+        this.clearPlaying();
+        this.playlist.songs[0].playing = true;
         let streamInfo: StreamInfo = { index: 0, songs: this.playlist.songs };
         this._audioService.playStream(streamInfo).subscribe((events) => {});
     }
 
     pause(): void {
-        this.playingSongId = null;
+        this.clearPlaying();
         this._audioService.pause();
+    }
+
+    isPlaying() {
+        var playing = false;
+        this.playlist.songs.forEach((song) => {
+            if (song.playing) playing = true;
+        });
+        return playing;
+    }
+
+    clearPlaying() {
+        this.playlist.songs.forEach((song) => {
+            song.playing = false;
+        });
+    }
+
+    secondsToTime(val) {
+        return secondsToTime(val);
+    }
+
+    totalDuration() {
+        var totalDuration = this.secondsToTime(this.playlist.songs.reduce((sum, { duration }) => sum + duration, 0));
+        return totalDuration;
     }
 }
