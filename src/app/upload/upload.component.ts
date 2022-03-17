@@ -103,7 +103,7 @@ export class UploadComponent implements OnInit, AfterViewInit {
     async upload() {
         this._dialogService.startProgressDialog({
             progressMsg: 'The upload process would be taken a little time. Please wait...',
-            doneMsg: 'You have uploaded successfully!',
+            doneMsg: 'Your album has been uploaded successfully!',
             isProcessed: false
         });
 

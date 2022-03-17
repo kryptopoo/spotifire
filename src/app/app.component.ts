@@ -44,6 +44,8 @@ export class AppComponent implements OnInit {
         this.walletAddress = this._walletService.getAddress();
         localStorage.removeItem('spotifire.playlists');
         await this.loadPlaylists();
+
+        this.loadLikedSongs();
     }
 
     ngAfterViewInit(): void {
@@ -99,5 +101,11 @@ export class AppComponent implements OnInit {
         });
         console.log('load playlists', this.playlists);
         localStorage.setItem('spotifire.playlists', JSON.stringify(this.playlists));
+    }
+
+    loadLikedSongs() {
+        var myLikedSongs = DatastoreService.getLikedSongs(this.walletAddress);
+        console.log('myLikedSongs', myLikedSongs)
+        localStorage.setItem('spotifire.likedSongs', JSON.stringify(myLikedSongs));
     }
 }

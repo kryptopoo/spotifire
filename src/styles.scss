@@ -44,6 +44,17 @@ body {
     width: 100%;
 }
 
+.bg-playlist-gradient {
+    background-image: -webkit-gradient(linear,left top,left bottom,from(rgba(0,0,0,.6)),to(#121212)),var(--background-noise);
+    background-image: linear-gradient(rgba(0,0,0,.6) 0,#121212 100%),var(--background-noise);
+    height:  52.5vh;
+    position: absolute;
+    width: 86.4vw;
+    z-index: 0;
+    margin: 0;
+    padding: 0;
+}
+
 // .mat-form-field-wrapper {
 //     padding-bottom: 0.25em !important;
 // }
@@ -71,22 +82,21 @@ body {
 }
 
 .snackbar-success {
-    // background-color: rgb(22, 163, 74) !important;
-    // color: rgb(245, 245, 245) !important;
-
-    // color: #155724!important;
-    // background-color: #d4edda!important;
-
     background-color: rgb(38, 38, 38) !important;
     color: rgb(245, 245, 245) !important;
-    // color: rgb(22, 163, 74) !important
 
-    // background-color: rgb(30, 30, 30) !important;
-    // color: rgb(5 122 85) !important;
+    .mat-simple-snackbar {
+        justify-content: center;
+    }
+}
 
-    // color: green;
-
-    
+.snackbar-info {
+    background-color: rgb(59 130 246) !important;
+    color: rgb(245, 245, 245) !important;
+    .mat-simple-snackbar {
+        justify-content: center;
+        font-size: 1rem;
+    }
 }
 
 .text-green-550 {
@@ -105,4 +115,8 @@ body {
 
 .mat-menu-panel {
     background-color: rgb(30, 30, 30) !important;
+}
+
+.liked-song-icon {
+    background: linear-gradient(135deg,#450af5,#c4efd9);padding-top: 0.15rem
 }

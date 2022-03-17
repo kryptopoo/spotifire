@@ -37,6 +37,7 @@ import { TransactionLogsComponent } from './transaction-logs/transaction-logs.co
 import { Web3storageService } from './services/web3storage.service';
 import { ConfirmDialogComponent } from './dialogs/confirm-dialog/confirm-dialog.component';
 import { ProgressDialogComponent } from './dialogs/progress-dialog/progress-dialog.component';
+import { LikedSongsComponent } from './liked-songs/liked-songs.component';
 
 declare var DatastoreService: any;
 
@@ -60,7 +61,8 @@ export function initializeApp() {
         ConfirmDialogComponent,
         TopNavigationComponent,
         TransactionLogsComponent,
-        ProgressDialogComponent
+        ProgressDialogComponent,
+        LikedSongsComponent
     ],
     imports: [
         BrowserModule,

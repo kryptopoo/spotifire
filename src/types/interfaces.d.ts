@@ -10,6 +10,9 @@ export interface Song {
     audioUrl: string;
     created: number;
     creator: string;
+    liked?: boolean;
+    likedAt?: number;
+    playing?: boolean;
 }
 
 export interface Album {
@@ -36,8 +39,9 @@ export interface Playlist {
     name: string;
     description: string;
     thumbnailUrl: string;
-    created: number;
+    created?: number;
     creator: string;
+    songs?: Array<Song>
 }
 
 export interface PlaylistSong {

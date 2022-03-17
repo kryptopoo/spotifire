@@ -2,17 +2,13 @@ import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import * as moment from 'moment';
+import { Song } from 'src/types/interfaces';
+
+declare var DatastoreService: any;
 
 export interface StreamInfo {
     index: number;
-    songs: SongInfo[];
-}
-
-export interface SongInfo {
-    title: string;
-    artist: string;
-    thumbnail: string;
-    url: string;
+    songs: Song[];
 }
 
 export interface StreamState {
@@ -85,8 +81,23 @@ export class AudioService {
 
     playStream(streamInfo: StreamInfo) {
         this.state.streamInfo = streamInfo;
-        console.log('playStream', streamInfo.songs[streamInfo.index]);
-        return this.streamObservable(streamInfo.songs[streamInfo.index].url).pipe(takeUntil(this.stop$));
+        var playSong: Song = streamInfo.songs[streamInfo.index];
+
+        // check liked song
+        var likedSongs = []
+        try{
+            likedSongs = JSON.parse(localStorage.getItem('spotifire.likedSongs'));
+            likedSongs.forEach(likedSong => {
+                if (likedSong._id == playSong._id) playSong.liked = true;
+            });
+        }
+        catch(e){
+            console.log(e)
+        }
+
+        console.log('playStream', playSong);
+
+        return this.streamObservable(playSong.audioUrl).pipe(takeUntil(this.stop$));
     }
 
     play() {

@@ -31,8 +31,8 @@
                     <i class="material-icons bg-gray-300 hover:bg-white mr-3 text-neutral-800">add</i>
                     <p>Create Playlist</p>
                 </button>
-                <button class="hover:text-white flex items-center justify-start" (click)="openCreatePlaylistDialog()">
-                    <i class="material-icons bg-gray-300 hover:bg-white mr-3 text-neutral-800">favorite</i>
+                <button class="hover:text-white flex items-center justify-start" [routerLink]="['/liked-songs']" >
+                    <i class="material-icons bg-gray-300 hover:bg-white mr-3 text-sm w-6 h-6 liked-song-icon">favorite</i>
                     <p>Liked Songs</p>
                 </button>
             </div>

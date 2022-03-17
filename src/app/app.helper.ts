@@ -1,8 +1,20 @@
 import { Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
 
 export function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function secondsToTime(val: any) {
+    var secs = val;
+    if (typeof val === 'string' || val instanceof String) secs = parseFloat(val.toString());
+
+    return moment.utc(secs * 1000).format('HH:mm:ss');
+}
+
+export function timeToFromNow(val: any){
+    return moment(val).fromNow(true)
 }
 
 export function generateId() {

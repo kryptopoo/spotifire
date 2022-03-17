@@ -72,7 +72,9 @@ export class YourLibraryComponent implements OnInit, AfterViewInit {
 
     loadSongs() {
         this.loading = true;
-        var data = DatastoreService.getSongs('', this.walletAddress);
+        console.log('this.walletAddress', this.walletAddress)
+        var data = DatastoreService.getSongs(null, this.walletAddress);
+        console.log('data', data)
         data.forEach((item: Song) => {
             var dataItem = new BindDataGridItem(item, 'song');
             this.songs.push(dataItem);

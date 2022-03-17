@@ -4,6 +4,14 @@ const ORBITDB_STORE_ARTIST = 'spotifire.artists';
 const ORBITDB_STORE_NEWS = 'spotifire.news';
 const ORBITDB_STORE_PLAYLIST = 'spotifire.playlists';
 const ORBITDB_STORE_PLAYLIST_SONG = 'spotifire.playlistsongs';
+const ORBITDB_STORE_LIKED_SONG = 'spotifire.likedsongs';
+
+// const ORBITDB_STORE_SONG = '/orbitdb/zdpuAwjSzg3dFPC9h3W3WuRLqQ1EtZ8sR8LAjMvjWQXEgZ49e/spotifire.songs';
+// const ORBITDB_STORE_ALBUM = '/orbitdb/zdpuAwzJxqjFe6Wzzvn6wfk9kvKLDGsuq14bnh31X1Rpm7UWn/spotifire.albums';
+// const ORBITDB_STORE_ARTIST = '/orbitdb/zdpuAvVJVPqaeQrQUEMCkkJcKu4o24Z3qBq9Qt4pWfK7f5pga/spotifire.artists';
+// const ORBITDB_STORE_NEWS = '/orbitdb/zdpuAxo6BkLMTWWzN843m5f7sDVS4ZeaPGTPdhJhrvkULJRp6/spotifire.news';
+// const ORBITDB_STORE_PLAYLIST = '/orbitdb/zdpuAtdLPAKCLyoZaXp9pJ2irmTot72RTgAMjsiRjcWScWHFB/spotifire.playlists';
+// const ORBITDB_STORE_PLAYLIST_SONG = '/orbitdb/zdpuAyNMGnHKTfDCCCTnjPTkmiUfEpiRyW9qgVKfTZEnXotnw/spotifire.playlistsong';
 
 // # # PC
 // # songStore /orbitdb/zdpuB2gLnpgHuzftc1UAgXvwLY5HK2CUFsYGwgtFa1d5h12QA/spotifire.songs
@@ -12,7 +20,6 @@ const ORBITDB_STORE_PLAYLIST_SONG = 'spotifire.playlistsongs';
 // # newsStore /orbitdb/zdpuAza5M2weMTqFHDSyhruKdkcEqPzP9EXoprxmh1HfoLWLr/spotifire.news
 // # playlistsStore /orbitdb/zdpuAzsono9RSt9QmPFZZBRtTNwD9A9Dbsuuu6awLCoSxPuFP/spotifire.playlists
 // # playlistsongsStore /orbitdb/zdpuAwLaPchghjUCwdn5gGrLNaa1itMroVaNQri7CyRyD5LVj/spotifire.playlistsongs
-
 
 //  PC LASTEST
 // songStore /orbitdb/zdpuAwjSzg3dFPC9h3W3WuRLqQ1EtZ8sR8LAjMvjWQXEgZ49e/spotifire.songs
@@ -49,6 +56,7 @@ class DatastoreService {
     newsStore;
     playlistStore;
     playlistsongStore;
+    likedSongStore;
 
     static async initOrbitDB() {
         try {
@@ -57,7 +65,7 @@ class DatastoreService {
             //console.log("OrbitDB", OrbitDB);
 
             const orbitdb = await OrbitDB.createInstance(ipfs);
-            // console.log("orbitdb", orbitdb);
+            console.log('orbitdb', orbitdb);
 
             // define stores
             this.songStore = await orbitdb.docstore(ORBITDB_STORE_SONG, { indexBy: 'title' });
@@ -78,12 +86,38 @@ class DatastoreService {
             this.playlistsongStore = await orbitdb.docstore(ORBITDB_STORE_PLAYLIST_SONG);
             console.log('playlistsongsStore', this.playlistsongStore.address.toString());
 
+            this.likedSongStore = await orbitdb.keyvalue(ORBITDB_STORE_LIKED_SONG);
+            console.log('likedSongStore', this.likedSongStore.address.toString());
+
             // // load
             await this.albumStore.load();
             await this.artistStore.load();
             await this.newsStore.load();
             await this.playlistStore.load();
             await this.playlistsongStore.load();
+            await this.likedSongStore.load();
+
+            // get all
+            await this.songStore.load();
+            console.log('all songs', this.songStore.get(''));
+
+            await this.albumStore.load();
+            console.log('all albums', this.albumStore.get(''));
+
+            await this.artistStore.load();
+            console.log('all artists', this.artistStore.get(''));
+
+            await this.newsStore.load();
+            console.log('all news', this.newsStore.get(''));
+
+            await this.playlistStore.load();
+            console.log('all playlists', this.playlistStore.get(''));
+
+            await this.playlistsongStore.load();
+            console.log('all playlist songs', this.playlistsongStore.get(''));
+
+            await this.likedSongStore.load();
+            console.log('all liked songs', this.likedSongStore.all);
         } catch (e) {
             console.log('err', e);
         }
@@ -289,5 +323,34 @@ class DatastoreService {
         });
 
         return songs;
+    }
+
+    static getLikedSongs(walletAddress) {
+        var likedSongs = this.likedSongStore.get(walletAddress);
+        return likedSongs;
+    }
+
+    static async addLikeSong(walletAddress, song) {
+        var likedSongs = this.likedSongStore.get(walletAddress);
+        if (likedSongs) {
+            likedSongs.push(song);
+            await this.likedSongStore.set(walletAddress, likedSongs);
+        } else {
+            await this.likedSongStore.put(walletAddress, [song]);
+        }
+
+        return likedSongs;
+    }
+
+    static async removeLikeSong(walletAddress, song) {
+        var likedSongs = this.likedSongStore.get(walletAddress);
+        if (likedSongs) {
+            likedSongs = likedSongs.filter((likeSong) => {
+                return likeSong._id != song._id;
+            });
+            await this.likedSongStore.set(walletAddress, likedSongs);
+        }
+
+        return likedSongs;
     }
 }

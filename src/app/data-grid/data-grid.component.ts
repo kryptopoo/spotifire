@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Album, Playlist, Song } from 'src/types/interfaces';
-import { AudioService, SongInfo, StreamInfo } from '../services/audio.service';
+import { AudioService, StreamInfo } from '../services/audio.service';
 import { DialogService } from '../services/dialog.service';
 
 declare var DatastoreService: any;
@@ -99,7 +99,7 @@ export class DataGridComponent implements OnInit {
 
     play(item: DataGridItem): void {
         if (item.type == 'song') {
-            let song: SongInfo = { title: item.name, artist: item.description, thumbnail: item.thumbnail, url: item.url };
+            let song: Song = item.dataSource as Song;
             let streamInfo: StreamInfo = { index: 0, songs: [song] };
             this._audioService.playStream(streamInfo).subscribe((events) => {});
         } else if (item.type == 'album') {
