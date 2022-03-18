@@ -17,6 +17,7 @@ export interface DataGridItem {
     duration: string;
     owner: string;
     creator: string;
+    created: number;
     dataSource?: Song | Album | Playlist;
 }
 
@@ -30,6 +31,7 @@ export class BindDataGridItem implements DataGridItem {
     duration: string;
     owner: string;
     creator: string;
+    created: number;
     dataSource?: Song | Album | Playlist;
 
     constructor(ds: Song | Album | Playlist, type: string) {
@@ -46,6 +48,7 @@ export class BindDataGridItem implements DataGridItem {
         this.description = item.artist.name;
         this.thumbnail = item.thumbnailUrl;
         this.creator = item.creator;
+        this.created = item.created;
         this.owner = item.creator;
     }
 
@@ -55,6 +58,7 @@ export class BindDataGridItem implements DataGridItem {
         this.description = item.artist.name;
         this.thumbnail = item.thumbnailUrl;
         this.creator = item.creator;
+        this.created = item.created;
         this.duration = item.duration.toString();
         this.url = item.audioUrl;
         this.owner = item.creator;
@@ -66,6 +70,7 @@ export class BindDataGridItem implements DataGridItem {
         this.description = item.description;
         this.thumbnail = item.thumbnailUrl;
         this.creator = item.creator;
+        this.created = item.created;
         this.owner = item.creator;
     }
 }

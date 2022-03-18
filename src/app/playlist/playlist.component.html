@@ -41,6 +41,8 @@
             <div class="flex p-2 uppercase text-sm">
                 <div class="w-12 text-center">#</div>
                 <div class="w-2/4">Title</div>
+                <div class="w-32">Date Added</div>
+                <div class="w-16"></div>
                 <div class="w-16 text-right"><i class="material-icons">access_time</i></div>
             </div>
             <div class="border-b border-neutral-800 mb-4"></div>
@@ -59,6 +61,13 @@
                         <div class="text-base text-green-600" *ngIf="song.playing">{{ song.title }}</div>
                         <div class="text-sm text-neutral-400">{{ song.artist.name }}</div>
                     </div>
+                </div>
+                <div class="w-32 flex items-center">{{ timeToFromNow(song.created) }}</div>
+                <div class="w-16 flex items-center justify-end hover:cursor-pointer pr-3">
+                    <i class="material-icons text-green-600" *ngIf="song.liked"
+                        (click)="removeLikeSong(song)">favorite</i>
+                        <i class="material-icons text-green-600" *ngIf="!song.liked"
+                        (click)="addLikeSong(song)">favorite_border</i>
                 </div>
                 <div class="w-16 flex items-center justify-center">{{ secondsToTime(song.duration) }}</div>
             </div>

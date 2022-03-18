@@ -131,6 +131,7 @@ class DatastoreService {
             if (genre) result = this.songStore.query((e) => e.genre == genre.toLowerCase());
             if (creator) result = this.songStore.query((e) => e.creator == creator);
         }
+        result = result.sort((a, b) => (a.created < b.created ? 1 : -1));
         return result;
     }
 
@@ -165,6 +166,7 @@ class DatastoreService {
             if (genre) result = this.albumStore.query((e) => e.genre == genre.toLowerCase());
             if (creator) result = this.albumStore.query((e) => e.creator == creator);
         }
+        result = result.sort((a, b) => (a.created < b.created ? 1 : -1));
         return result;
     }
 
@@ -286,12 +288,32 @@ class DatastoreService {
     }
 
     static getNews(type) {
-        var news = this.newsStore.query((e) => e.type == type);
-        return news;
+        var result = this.newsStore.query((e) => e.type == type);
+        result = result.sort((a, b) => (a.created < b.created ? 1 : -1));
+        return result;
     }
 
     static async createPlaylist(playlist) {
         await this.playlistStore.put(playlist);
+
+        var newPlaylists = this.newsStore.query((p) => p.type == 'playlist');
+        if (newPlaylists.length > 5) {
+            let replaceNewPlaylist = newPlaylists[0];
+            newPlaylists.forEach((newPlaylist) => {
+                if (newPlaylist.created < replaceNewPlaylist) {
+                    replaceNewPlaylist = newPlaylist;
+                }
+            });
+
+            let delPlaylist = await this.newsStore.del(replaceNewPlaylist._id);
+            console.log('del Playlist', delPlaylist);
+        }
+        await this.newsStore.put({
+            _id: playlist._id,
+            type: 'playlist',
+            object: playlist,
+            created: Math.round(Date.now())
+        });
     }
 
     static async addToPlaylist(song, playlistId, creator) {
@@ -306,8 +328,9 @@ class DatastoreService {
     }
 
     static getPlaylists(creator) {
-        var playlists = this.playlistStore.query((e) => e.creator == creator);
-        return playlists;
+        var result = this.playlistStore.query((e) => e.creator == creator);
+        result = result.sort((a, b) => (a.created < b.created ? 1 : -1));
+        return result;
     }
 
     static getPlaylistById(id) {
@@ -316,18 +339,19 @@ class DatastoreService {
     }
 
     static getPlaylistSongs(playlistId) {
-        var songs = [];
+        var result = [];
         var playlistSongs = this.playlistsongStore.query((e) => e.playlistId == playlistId);
         playlistSongs.forEach((ps) => {
-            songs.push(ps.song);
+            result.push(ps.song);
         });
-
-        return songs;
+        result = result.sort((a, b) => (a.created < b.created ? 1 : -1));
+        return result;
     }
 
     static getLikedSongs(walletAddress) {
-        var likedSongs = this.likedSongStore.get(walletAddress);
-        return likedSongs;
+        var result = this.likedSongStore.get(walletAddress);
+        result = result.sort((a, b) => (a.likedAt < b.likedAt ? 1 : -1));
+        return result;
     }
 
     static async addLikeSong(walletAddress, song) {

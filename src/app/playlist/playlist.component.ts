@@ -2,9 +2,11 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AudioService, StreamInfo } from '../services/audio.service';
 import { Album, Playlist, Song } from 'src/types/interfaces';
-import { secondsToTime } from '../app.helper';
+import { secondsToTime, timeToFromNow } from '../app.helper';
 import { DatastoreLoaderService } from '../services/datastore-loader.service';
 import { Observable } from 'rxjs';
+import { WalletService } from '../services/wallet.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 declare var DatastoreService: any;
 
@@ -29,10 +31,11 @@ export class PlaylistComponent implements OnInit {
     isPlaying: boolean = false;
 
     constructor(
-        private cd: ChangeDetectorRef,
         private route: ActivatedRoute,
         private _audioService: AudioService,
-        private _datastoreLoaderService: DatastoreLoaderService
+        private _datastoreLoaderService: DatastoreLoaderService,
+        private _walletService: WalletService,
+        private _snackBar: MatSnackBar
     ) {}
 
     async ngOnInit(): Promise<void> {
@@ -40,12 +43,11 @@ export class PlaylistComponent implements OnInit {
         this.type = this.route.routeConfig.path.split('/')[0];
 
         this.route.params.subscribe(async (params) => {
-            const id = params.id;
-
+            this.id = params.id;
             this._datastoreLoaderService.load$.subscribe(async () => {
-                await this.loadData();
+                this.loadData();
             });
-            if (this._datastoreLoaderService.isLoaded) await this.loadData();
+            if (this._datastoreLoaderService.isLoaded) this.loadData();
         });
 
         this._audioService.getState().subscribe((state) => {
@@ -57,18 +59,19 @@ export class PlaylistComponent implements OnInit {
         });
     }
 
-    async loadData() {
+    loadData() {
         if (this.type == 'playlist') {
-            this.playlist = await DatastoreService.getPlaylistById(this.id);
+            console.log('this.id', this.id);
+            this.playlist = DatastoreService.getPlaylistById(this.id);
 
             // get songs
-            var songs = await DatastoreService.getPlaylistSongs(this.id);
+            var songs = DatastoreService.getPlaylistSongs(this.id);
             this.playlist.songs = songs;
             console.log('this.playlist', this.playlist);
         }
 
         if (this.type == 'album') {
-            var album: Album = await DatastoreService.getAlbumById(this.id);
+            var album: Album = DatastoreService.getAlbumById(this.id);
             this.playlist = {
                 _id: album._id,
                 name: album.title,
@@ -80,6 +83,18 @@ export class PlaylistComponent implements OnInit {
 
             console.log('this.album', this.playlist);
         }
+
+        // check liked songs
+        var likedSongs: Array<Song> = DatastoreService.getLikedSongs(this._walletService.getAddress());
+        this.playlist.songs.forEach((song) => {
+            let isLiked = false;
+            likedSongs.forEach((likedSong) => {
+                if (likedSong._id == song._id) {
+                    isLiked = true;
+                }
+            });
+            song.liked = isLiked;
+        });
     }
 
     playSong(song: any): void {
@@ -126,5 +141,24 @@ export class PlaylistComponent implements OnInit {
     totalDuration() {
         var totalDuration = this.secondsToTime(this.playlist.songs.reduce((sum, { duration }) => sum + duration, 0));
         return totalDuration;
+    }
+
+    timeToFromNow(value) {
+        return timeToFromNow(value);
+    }
+
+    async removeLikeSong(likedSong) {
+        likedSong.liked = false;
+        var newLikedSongs = await DatastoreService.removeLikeSong(this._walletService.getAddress(), likedSong);
+        localStorage.setItem('spotifire.likedSongs', JSON.stringify(newLikedSongs));
+        this._snackBar.open(`Removed from your liked songs`, null, { duration: 1500, panelClass: ['snackbar-info'] });
+    }
+
+    async addLikeSong(likedSong) {
+        likedSong.liked = true;
+        likedSong.likedAt = Math.round(Date.now());
+        var newLikedSongs = await DatastoreService.addLikeSong(this._walletService.getAddress(), likedSong);
+        localStorage.setItem('spotifire.likedSongs', JSON.stringify(newLikedSongs));
+        this._snackBar.open(`Added to your liked songs`, null, { duration: 1500, panelClass: ['snackbar-info'] });
     }
 }

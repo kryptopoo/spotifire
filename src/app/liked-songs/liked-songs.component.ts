@@ -3,6 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Playlist, Song } from 'src/types/interfaces';
 import { secondsToTime, timeToFromNow } from '../app.helper';
 import { AudioService, StreamInfo } from '../services/audio.service';
+import { DatastoreLoaderService } from '../services/datastore-loader.service';
 import { WalletService } from '../services/wallet.service';
 
 declare var DatastoreService: any;
@@ -12,39 +13,36 @@ declare var DatastoreService: any;
     templateUrl: './liked-songs.component.html',
     styleUrls: ['./liked-songs.component.scss']
 })
-export class LikedSongsComponent implements OnInit, AfterViewInit {
+export class LikedSongsComponent implements OnInit {
     playlist: Playlist = {
         _id: 'liked-songs',
         name: 'Liked Songs',
         description: null,
-        thumbnailUrl: 'assets/images/liked-songs.png',
+        thumbnailUrl: '/assets/images/liked-songs.jpg',
         creator: '',
         songs: []
     };
 
     isPlaying: boolean = false;
 
-    constructor(private _audioService: AudioService, private _walletService: WalletService, private _snackBar: MatSnackBar) {
-        this.playlist = {
-            _id: 'liked-songs',
-            name: 'Liked Songs',
-            description: null,
-            thumbnailUrl: 'assets/images/liked-songs.png',
-            creator: this._walletService.getAddress(),
-            songs: []
-        };
-    }
+    constructor(
+        private _audioService: AudioService,
+        private _walletService: WalletService,
+        private _snackBar: MatSnackBar,
+        private _datastoreLoaderService: DatastoreLoaderService
+    ) {}
 
-    ngOnInit() {}
-
-    ngAfterViewInit(): void {
-        console.log('ngAfterViewInit');
-        this.clearPlaying();
-        this.loadLikedSongs();
+    ngOnInit() {
+        this._datastoreLoaderService.load$.subscribe(() => {
+            this.loadLikedSongs();
+        });
+        if (this._datastoreLoaderService.isLoaded) this.loadLikedSongs();
 
         this._audioService.getState().subscribe((state) => {
             if (!state.playing) {
-                this.clearPlaying();
+                setTimeout(() => {
+                    this.clearPlaying();
+                });
             }
         });
     }
