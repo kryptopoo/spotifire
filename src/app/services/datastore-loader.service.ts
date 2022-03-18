@@ -13,7 +13,7 @@ export class DatastoreLoaderService {
 
     constructor(private _dialogService: DialogService) {}
 
-    async load() {
+    async load(config: any) {
         const progressDialog = this._dialogService.startProgressDialog({
             progressMsg: 'Loading database...',
             progressIcon: 'sync',
@@ -22,7 +22,7 @@ export class DatastoreLoaderService {
             showDoneButton: false
         });
 
-        await DatastoreService.initOrbitDB();
+        await DatastoreService.initOrbitDB(config);
 
         this._dialogService.closeProgressDialog(progressDialog);
 

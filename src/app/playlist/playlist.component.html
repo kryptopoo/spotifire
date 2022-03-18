@@ -27,15 +27,15 @@
         </div>
     </div>
 
-    <div  class="bg-playlist-gradient"  style="background-color: rgb(83, 83, 83);"></div>
+    <div class="bg-playlist-gradient" style="background-color: rgb(83, 83, 83);"></div>
 
     <div class="overflow-y-scroll scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-neutral-900"
         style="height: 52vh;">
         <div class="px-8 py-3 flex relative">
-            <button *ngIf="!isPlaying()"><i class="material-icons text-6xl text-green-500"
+            <button><i class="material-icons text-6xl text-green-500" *ngIf="!isPlaying"
                     (click)="playPlaylist()">play_circle_filled</i></button>
-            <button *ngIf="isPlaying()"><i class="material-icons text-6xl text-green-500"
-                (click)="pause()">pause_circle_filled</i></button>
+            <button><i class="material-icons text-6xl text-green-500" *ngIf="isPlaying"
+                    (click)="pause()">pause_circle_filled</i></button>
         </div>
         <div class="px-8 relative">
             <div class="flex p-2 uppercase text-sm">
@@ -48,11 +48,12 @@
                 *ngFor="let song of playlist.songs; let i = index" (dblclick)="playSong(song)">
                 <div class="w-12 flex items-center justify-center">
                     <span *ngIf="!song.playing">{{ i + 1 }}</span>
-                    <img *ngIf="song.playing"  width="14" height="14" alt="" src="/assets/images/equaliser-animated-green.gif">
+                    <img *ngIf="song.playing" width="14" height="14" alt=""
+                        src="/assets/images/equaliser-animated-green.gif">
                 </div>
                 <div class="w-2/4 flex">
                     <img [src]="song.thumbnailUrl" class="w-10 h-10 mr-4" />
-                    
+
                     <div>
                         <div class="text-base" *ngIf="!song.playing">{{ song.title }}</div>
                         <div class="text-base text-green-600" *ngIf="song.playing">{{ song.title }}</div>

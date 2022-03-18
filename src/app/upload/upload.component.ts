@@ -23,7 +23,6 @@ export class UploadComponent implements OnInit, AfterViewInit {
 
     genres = AppConstants.Genres;
 
-    // thumbBuffer: Buffer = null;
     album: any = {
         title: '',
         artist: '',
@@ -60,7 +59,7 @@ export class UploadComponent implements OnInit, AfterViewInit {
     async onAddAudioFileChanged(event: Event) {
         const target = event.target as HTMLInputElement;
         const file: File = (target.files as FileList)[0];
-        if (!file) return
+        if (!file) return;
 
         let addSong = {
             title: '',
@@ -81,13 +80,6 @@ export class UploadComponent implements OnInit, AfterViewInit {
                     addSong.duration = (audioElement as any).duration;
                 };
             });
-            // this.readFileAsBuffer(file, async (buffer) => {
-            //     try {
-            //         addSong.price = (await this._bundlrService.getPrice(buffer.length)).toFixed(5);
-            //     } catch {}
-
-            //     addSong.buffer = buffer;
-            // });
         }, 100);
 
         id3.fromFile(file).then((tags) => {
@@ -102,10 +94,11 @@ export class UploadComponent implements OnInit, AfterViewInit {
     }
 
     async upload() {
-        this._dialogService.startProgressDialog({
+        const progressDialog = this._dialogService.startProgressDialog({
             progressMsg: 'The upload process would be taken a little time. Please wait...',
             doneMsg: 'Your album has been uploaded successfully!',
-            isProcessed: false
+            isProcessed: false,
+            showDoneButton: false
         });
 
         // TODO: validation
@@ -171,7 +164,7 @@ export class UploadComponent implements OnInit, AfterViewInit {
 
         await DatastoreService.createAlbum(newAlbum);
 
-        this._dialogService.stopProgressDialog();
+        this._dialogService.closeProgressDialog(progressDialog);
     }
 
     connectWallet() {

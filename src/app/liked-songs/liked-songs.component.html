@@ -42,9 +42,9 @@
     <div class="overflow-y-scroll scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-neutral-900"
         style="height: 52vh" *ngIf="playlist.songs.length > 0">
         <div class="px-8 py-3 flex relative">
-            <button *ngIf="!isPlaying()"><i class="material-icons text-6xl text-green-500"
+            <button *ngIf="!isPlaying"><i class="material-icons text-6xl text-green-500"
                     (click)="playPlaylist()">play_circle_filled</i></button>
-            <button *ngIf="isPlaying()"><i class="material-icons text-6xl text-green-500"
+            <button *ngIf="isPlaying"><i class="material-icons text-6xl text-green-500"
                     (click)="pause()">pause_circle_filled</i></button>
         </div>
         <div class="px-8 relative">

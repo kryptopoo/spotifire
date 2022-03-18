@@ -47,7 +47,7 @@ body {
 .bg-playlist-gradient {
     background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.6)), to(#121212)), var(--background-noise);
     background-image: linear-gradient(rgba(0, 0, 0, 0.6) 0, #121212 100%), var(--background-noise);
-    height: 55vh;
+    height: 52vh;
     position: fixed;
     width: 100%;
     z-index: 0;

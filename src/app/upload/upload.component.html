@@ -2,12 +2,12 @@
 <div class="w-full sticky top-0 py-4 px-6 flex items-center justify-between">
     <div class="flex items-center">
         <h1 class="text-2xl font-semibold">Upload Album</h1>
-        <div class="mx-8 text-gray-300 text-sm"  *ngIf="walletAddress">
+        <!-- <div class="mx-8 text-gray-300 text-sm"  *ngIf="walletAddress">
             <button class="hover:text-white w-full rounded py-2 flex items-center justify-start" [routerLink]="['/transaction-logs']">
                 <i class="material-icons pr-2">history</i>
                 <p>History</p>
             </button>
-        </div>
+        </div> -->
     </div>
     <div>
         <app-wallet  #walletCompoment ></app-wallet>

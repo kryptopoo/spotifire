@@ -22,6 +22,8 @@ export class LikedSongsComponent implements OnInit, AfterViewInit {
         songs: []
     };
 
+    isPlaying: boolean = false;
+
     constructor(private _audioService: AudioService, private _walletService: WalletService, private _snackBar: MatSnackBar) {
         this.playlist = {
             _id: 'liked-songs',
@@ -33,18 +35,16 @@ export class LikedSongsComponent implements OnInit, AfterViewInit {
         };
     }
 
-    ngOnInit() {
-        
-    }
+    ngOnInit() {}
 
     ngAfterViewInit(): void {
-        console.log('ngAfterViewInit')
-        this.clearPlaying()
+        console.log('ngAfterViewInit');
+        this.clearPlaying();
         this.loadLikedSongs();
 
         this._audioService.getState().subscribe((state) => {
             if (!state.playing) {
-                this.clearPlaying()
+                this.clearPlaying();
             }
         });
     }
@@ -57,36 +57,40 @@ export class LikedSongsComponent implements OnInit, AfterViewInit {
     }
 
     playSong(song: any): void {
-        this.clearPlaying();
-        song.playing = true;
         let streamInfo: StreamInfo = { index: 0, songs: [song] };
-        this._audioService.playStream(streamInfo).subscribe((events) => {});
+        this._audioService.playStream(streamInfo).subscribe((events) => {
+            this.setPlaying(song);
+        });
     }
 
     playPlaylist(): void {
-        this.clearPlaying();
-        this.playlist.songs[0].playing = true;
         let streamInfo: StreamInfo = { index: 0, songs: this.playlist.songs };
-        this._audioService.playStream(streamInfo).subscribe((events) => {});
+        this._audioService.playStream(streamInfo).subscribe((events) => {
+            this.setPlaying(this.playlist.songs[0]);
+        });
     }
 
     pause(): void {
-        this.clearPlaying();
         this._audioService.pause();
-    }
 
-    isPlaying() {
-        var playing = false;
-        this.playlist.songs.forEach((song) => {
-            if (song.playing) playing = true;
+        setTimeout(() => {
+            this.clearPlaying();
         });
-        return playing;
     }
 
-    clearPlaying(){
+    setPlaying(song: Song) {
+        this.clearPlaying();
+        this.playlist.songs.forEach((s) => {
+            if (s._id == song._id) s.playing = true;
+        });
+        this.isPlaying = true;
+    }
+
+    clearPlaying() {
         this.playlist.songs.forEach((song) => {
             song.playing = false;
         });
+        this.isPlaying = false;
     }
 
     secondsToTime(val) {

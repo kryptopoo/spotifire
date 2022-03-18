@@ -9,6 +9,9 @@ import { Playlist } from 'src/types/interfaces';
 import { WalletService } from './services/wallet.service';
 import { DialogService } from './services/dialog.service';
 import { DatastoreLoaderService } from './services/datastore-loader.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+import { finalize } from 'rxjs/operators';
 
 declare var DatastoreService: any;
 
@@ -33,6 +36,7 @@ export class AppComponent implements OnInit {
     fileHelper: FileHelper;
 
     constructor(
+        private _httpClient: HttpClient,
         private _fileHelper: FileHelper,
         private _dialog: MatDialog,
         private _snackBar: MatSnackBar,
@@ -45,31 +49,39 @@ export class AppComponent implements OnInit {
     }
 
     async ngOnInit() {
-        await this._datastoreLoaderService.load();
-        // const progressDialog = this._dialogService.startProgressDialog({
-        //     progressMsg: 'Loading database...',
-        //     progressIcon: 'sync',
-        //     doneMsg: 'Database has been loaded successfully!',
-        //     isProcessed: false,
-        //     showDoneButton: false
-        // });
+        this._httpClient
+            .get(window.location.origin + '/config')
+            .pipe(
+                finalize(async () => {
+                    const config = JSON.parse(sessionStorage.getItem('spotifire.config'));
+                    await this._datastoreLoaderService.load(config);
 
-        // await DatastoreService.initOrbitDB();
-
-        // this._dialogService.closeProgressDialog(progressDialog);
-
-        this.walletAddress = this._walletService.getAddress();
-        localStorage.removeItem('spotifire.playlists');
-        await this.loadPlaylists();
-
-        this.loadLikedSongs();
+                    this.walletAddress = this._walletService.getAddress();
+                    localStorage.removeItem('spotifire.playlists');
+                    this.loadPlaylists();
+                    this.loadLikedSongs();
+                })
+            )
+            .subscribe(
+                (res) => {
+                    //console.log('res', res)
+                    console.log('load config from node env', res);
+                    sessionStorage.setItem('spotifire.config', JSON.stringify(res));
+                },
+                (error) => {
+                    console.log('load config from angular env', environment);
+                    sessionStorage.setItem('spotifire.config', JSON.stringify(environment));
+                }
+            );
     }
 
     ngAfterViewInit(): void {
         this._walletService.connection$.subscribe((isConnected: boolean) => {
             if (isConnected) {
+                console.log('_walletService isConnected');
                 this.walletAddress = this._walletService.getAddress();
                 this.loadPlaylists();
+                this.loadLikedSongs();
             }
         });
     }
@@ -108,9 +120,9 @@ export class AppComponent implements OnInit {
         await this.loadPlaylists();
     }
 
-    async loadPlaylists() {
+    loadPlaylists() {
         this.playlists = [];
-        var myPlaylists = await DatastoreService.getPlaylists(this.walletAddress);
+        var myPlaylists = DatastoreService.getPlaylists(this.walletAddress);
         myPlaylists.forEach((item) => {
             var dataItem = new BindDataGridItem(item, 'playlist');
             // dataItem.bindPlaylistData(item);

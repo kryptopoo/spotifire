@@ -22,6 +22,7 @@ Spotifire is a fully decentralized music-sharing platform with a community of ar
 
 
 ### Live Demo
+https://spotifire-demo.herokuapp.com
 
 
 ### Screenshots
