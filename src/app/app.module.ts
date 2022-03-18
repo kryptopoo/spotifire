@@ -41,11 +41,11 @@ import { LikedSongsComponent } from './liked-songs/liked-songs.component';
 
 declare var DatastoreService: any;
 
-export function initializeApp() {
-    return (): Promise<any> => {
-        return DatastoreService.initOrbitDB();
-    };
-}
+// export function initializeApp() {
+//     return (): Promise<any> => {
+//         return DatastoreService.initOrbitDB();
+//     };
+// }
 
 @NgModule({
     declarations: [

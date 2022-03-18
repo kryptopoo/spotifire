@@ -58,13 +58,13 @@ export class AppComponent implements OnInit {
 
                     this.walletAddress = this._walletService.getAddress();
                     localStorage.removeItem('spotifire.playlists');
+                    localStorage.removeItem('spotifire.likedSongs');
                     this.loadPlaylists();
                     this.loadLikedSongs();
                 })
             )
             .subscribe(
                 (res) => {
-                    //console.log('res', res)
                     console.log('load config from node env', res);
                     sessionStorage.setItem('spotifire.config', JSON.stringify(res));
                 },
@@ -78,7 +78,6 @@ export class AppComponent implements OnInit {
     ngAfterViewInit(): void {
         this._walletService.connection$.subscribe((isConnected: boolean) => {
             if (isConnected) {
-                console.log('_walletService isConnected');
                 this.walletAddress = this._walletService.getAddress();
                 this.loadPlaylists();
                 this.loadLikedSongs();
@@ -117,7 +116,7 @@ export class AppComponent implements OnInit {
         await DatastoreService.createPlaylist(newPlaylist);
 
         this._snackBar.open(`Playlist has been created`, null, { duration: 3000, panelClass: ['snackbar-success'] });
-        await this.loadPlaylists();
+        this.loadPlaylists();
     }
 
     loadPlaylists() {
@@ -125,16 +124,13 @@ export class AppComponent implements OnInit {
         var myPlaylists = DatastoreService.getPlaylists(this.walletAddress);
         myPlaylists.forEach((item) => {
             var dataItem = new BindDataGridItem(item, 'playlist');
-            // dataItem.bindPlaylistData(item);
             this.playlists.push(dataItem);
         });
-        console.log('load playlists', this.playlists);
         localStorage.setItem('spotifire.playlists', JSON.stringify(this.playlists));
     }
 
     loadLikedSongs() {
         var myLikedSongs = DatastoreService.getLikedSongs(this.walletAddress);
-        console.log('myLikedSongs', myLikedSongs);
         localStorage.setItem('spotifire.likedSongs', JSON.stringify(myLikedSongs));
     }
 }

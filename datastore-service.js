@@ -33,7 +33,6 @@ class DatastoreService {
             console.log('initOrbitDB config', config);
             const ipfs = await Ipfs.create(ipfsConfig);
             console.log('ipfs id', await ipfs.id());
-            //console.log("OrbitDB", OrbitDB);
 
             const orbitdb = await OrbitDB.createInstance(ipfs);
             this.ipfsId = orbitdb.id;
@@ -148,7 +147,6 @@ class DatastoreService {
             });
 
             let delSong = await this.newsStore.del(replaceNewSong._id);
-            console.log('del song', delSong);
         }
         await this.newsStore.put({
             _id: song._id,
@@ -190,7 +188,6 @@ class DatastoreService {
         // search by artirt
         if (artistWords.length > 0) {
             var artists = this.searchArtists(artistWords);
-            console.log('search artist', artists);
 
             artists.forEach((artist) => {
                 var searchItems = this.songStore.query((p) => p.artist.id == artist.id);
@@ -217,7 +214,6 @@ class DatastoreService {
         // search by artirt
         if (artistWords.length > 0) {
             var artists = this.searchArtists(artistWords);
-            console.log('search artist', artists);
 
             artists.forEach((artist) => {
                 var searchItems = this.albumStore.query((p) => p.artist.id == artist.id);
@@ -268,7 +264,6 @@ class DatastoreService {
             });
 
             let delAlbum = await this.newsStore.del(replaceNewAlbum._id);
-            console.log('delAlbum', delAlbum);
         }
         await this.newsStore.put({
             _id: album._id,
@@ -306,7 +301,6 @@ class DatastoreService {
             });
 
             let delPlaylist = await this.newsStore.del(replaceNewPlaylist._id);
-            console.log('del Playlist', delPlaylist);
         }
         await this.newsStore.put({
             _id: playlist._id,
@@ -350,7 +344,7 @@ class DatastoreService {
 
     static getLikedSongs(walletAddress) {
         var result = this.likedSongStore.get(walletAddress);
-        result = result.sort((a, b) => (a.likedAt < b.likedAt ? 1 : -1));
+        result = result ? result.sort((a, b) => (a.likedAt < b.likedAt ? 1 : -1)) : [];
         return result;
     }
 

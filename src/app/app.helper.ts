@@ -13,8 +13,8 @@ export function secondsToTime(val: any) {
     return moment.utc(secs * 1000).format('HH:mm:ss');
 }
 
-export function timeToFromNow(val: any){
-    return moment(val).fromNow(true)
+export function timeToFromNow(val: any) {
+    return moment(val).fromNow(true);
 }
 
 export function generateId() {
@@ -56,7 +56,6 @@ export class FileHelper {
     onFileChanged(event: Event, selectedFile: SelectInputFile) {
         const target = event.target as HTMLInputElement;
         const file: File = (target.files as FileList)[0];
-        console.log(file);
         selectedFile.file = file;
 
         // preview image

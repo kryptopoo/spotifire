@@ -1,10 +1,9 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AudioService, StreamInfo } from '../services/audio.service';
 import { Album, Playlist, Song } from 'src/types/interfaces';
 import { secondsToTime, timeToFromNow } from '../app.helper';
 import { DatastoreLoaderService } from '../services/datastore-loader.service';
-import { Observable } from 'rxjs';
 import { WalletService } from '../services/wallet.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -61,13 +60,11 @@ export class PlaylistComponent implements OnInit {
 
     loadData() {
         if (this.type == 'playlist') {
-            console.log('this.id', this.id);
             this.playlist = DatastoreService.getPlaylistById(this.id);
 
             // get songs
             var songs = DatastoreService.getPlaylistSongs(this.id);
             this.playlist.songs = songs;
-            console.log('this.playlist', this.playlist);
         }
 
         if (this.type == 'album') {
@@ -80,8 +77,6 @@ export class PlaylistComponent implements OnInit {
                 songs: album.songs,
                 creator: album.creator
             };
-
-            console.log('this.album', this.playlist);
         }
 
         // check liked songs

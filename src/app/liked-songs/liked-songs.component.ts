@@ -51,7 +51,6 @@ export class LikedSongsComponent implements OnInit {
         this.playlist.songs = [];
         var likedSongs: Array<Song> = DatastoreService.getLikedSongs(this._walletService.getAddress());
         this.playlist.songs = likedSongs;
-        console.log('likedSongs playlist', this.playlist);
     }
 
     playSong(song: any): void {

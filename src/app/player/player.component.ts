@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Song } from 'src/types/interfaces';
 import { AudioService, StreamInfo, StreamState } from '../services/audio.service';
 import { WalletService } from '../services/wallet.service';
 

@@ -12,8 +12,6 @@ export class WalletService {
     async connect(): Promise<boolean> {
         const ethereum = (window as any)?.ethereum;
 
-        console.log('ethereum', ethereum);
-
         if (!ethereum?.isMetaMask) return null;
         await ethereum.enable();
 
@@ -22,7 +20,6 @@ export class WalletService {
             // You should disable this button while the request is pending!
             await ethereum.request({ method: 'eth_requestAccounts' });
             const accounts = await ethereum.request({ method: 'eth_accounts' });
-            console.log('accounts', accounts);
 
             if (accounts.length > 0) {
                 localStorage.setItem('spotifire.wallet', accounts[0]);

@@ -89,8 +89,6 @@ export class UploadComponent implements OnInit, AfterViewInit {
             addSong.artist = tags.artist?.split(',').pop();
             //addSong.duration = tags.duration;
         });
-
-        console.log('this.album.songs', this.album.songs);
     }
 
     async upload() {
@@ -112,7 +110,6 @@ export class UploadComponent implements OnInit, AfterViewInit {
 
         // get artist
         var artists = await DatastoreService.getArtists(this.album.artist);
-        console.log('artists', artists);
         let artist: Artist = {
             _id: generateId(),
             avatarUrl: '',
@@ -124,7 +121,6 @@ export class UploadComponent implements OnInit, AfterViewInit {
         } else {
             artist = artists[0];
         }
-        console.log('artist', artist);
 
         // add album to orbitdb
         let newAlbum: Album = {

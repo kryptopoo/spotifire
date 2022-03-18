@@ -3,7 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Album, Playlist, Song } from 'src/types/interfaces';
 import { AudioService, StreamInfo } from '../services/audio.service';
-import { DialogService } from '../services/dialog.service';
+import { WalletService } from '../services/wallet.service';
 
 declare var DatastoreService: any;
 
@@ -85,13 +85,12 @@ export class DataGridComponent implements OnInit {
 
     selectedItem: DataGridItem;
     playlists: Array<any> = new Array<any>();
-    walletAddress: string = '0xE13336D630Bfc6292ffD631eCefCfbE6d617C07E';
 
     constructor(
         private _audioService: AudioService,
         private _router: Router,
-        private _dialogService: DialogService,
-        private _snackBar: MatSnackBar
+        private _snackBar: MatSnackBar,
+        private _walletService: WalletService
     ) {}
 
     ngOnInit(): void {
@@ -115,60 +114,14 @@ export class DataGridComponent implements OnInit {
     }
 
     async addToPlaylist(playlist) {
-        console.log('addToPlaylist', this.selectedItem.dataSource as Song, playlist);
-
-        // await DatastoreService.addToPlaylist({
-        //     _id: this.selectItem.id,
-        //     title: this.selectItem.name,
-        //     artist: {
-        //         _id: '',
-        //         avatarUrl: '',
-        //         name: '',
-        //         created: 0
-        //     },
-        //     audioUrl: '',
-        //     created: 0,
-        //     creator: '',
-        //     duration: 0,
-        //     genre: '',
-        //     thumbnailUrl: ''
-        // }, playlist, '')
-
-        await DatastoreService.addToPlaylist(this.selectedItem.dataSource as Song, playlist.id, this.walletAddress);
-        this._snackBar.open(`Added "${this.selectedItem.name}" to "${playlist.name}" successfully`, null, {
-            duration: 3000,
-            panelClass: ['snackbar-success']
-        });
-
-        // const dataBytes = Buffer.from('').length;
-        // const dataUploadFee = await this._bundlrService.getPrice(dataBytes);
-        // this._dialogService
-        //     .confirmDialog({
-        //         fee: dataUploadFee.toFixed(5)
-        //     })
-        //     .subscribe(async (confirmed) => {
-        //         if (confirmed) {
-        //             let tags = [
-        //                 { name: 'Content-Type', value: 'application/json' },
-        //                 { name: 'Data-Type', value: 'playlist-song' },
-        //                 { name: 'Title', value: this.selectedItem.name },
-        //                 { name: 'Artist', value: this.selectedItem.description },
-        //                 { name: 'Thumbnail', value: this.selectedItem.thumbnail?.split('/').pop() },
-        //                 { name: 'Duration', value: this.selectedItem.duration },
-        //                 { name: 'Playlist', value: playlist.id },
-        //                 { name: 'Song', value: this.selectedItem.url?.split('/').pop() }
-        //             ];
-
-        //             let rsAddPlaylist: any = await this._bundlrService.upload(Buffer.from(''), tags);
-        //             console.log('rsAddPlaylist', rsAddPlaylist.data);
-
-        //             //this._snackBar.open(`Transaction ${rsAddPlaylist.data.id} has been submitted`, null, { duration: 3000, panelClass: ['snackbar-success'] });
-        //             this._snackBar.open(`Added "${this.selectedItem.name}" to "${playlist.name}" successfully`, null, {
-        //                 duration: 3000,
-        //                 panelClass: ['snackbar-success']
-        //             });
-        //         }
-        //     });
+        const walletAddress = this._walletService.getAddress();
+        if (walletAddress) {
+            await DatastoreService.addToPlaylist(this.selectedItem.dataSource as Song, playlist.id, walletAddress);
+            this._snackBar.open(`Added "${this.selectedItem.name}" to "${playlist.name}" successfully`, null, {
+                duration: 3000,
+                panelClass: ['snackbar-success']
+            });
+        }
     }
 
     selectItem(item: DataGridItem) {
