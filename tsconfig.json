@@ -27,13 +27,13 @@
     "noImplicitAny": false,
     "paths": {
       "fs": ["./node_modules/fs-web"],
-      "fs/promises": ["./node_modules/fs-extra/lib/fs"],
+      // "fs/promises": ["./node_modules/fs-extra/lib/fs"],
       "stream": [ "./node_modules/stream-browserify" ],
-      "crypto": [ "./node_modules/crypto-browserify" ],
-      "util": [ "./node_modules/util/" ],
+      // "crypto": [ "./node_modules/crypto-browserify" ],
+      // "util": [ "./node_modules/util/" ],
       "assert": [ "./node_modules/assert/" ],
-      "zlib": [ "./node_modules/browserify-zlib" ],
-      "tty": [ "./node_modules/tty-browserify" ],
+      // "zlib": [ "./node_modules/browserify-zlib" ],
+      // "tty": [ "./node_modules/tty-browserify" ],
       "os":  [ "./node_modules/os-browserify/browser" ]
     },
     "types": [
