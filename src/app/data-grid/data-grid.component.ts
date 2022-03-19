@@ -3,6 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Album, Playlist, Song } from 'src/types/interfaces';
 import { AudioService, StreamInfo } from '../services/audio.service';
+import { EventsService } from '../services/events.service';
 import { WalletService } from '../services/wallet.service';
 
 declare var DatastoreService: any;
@@ -90,10 +91,14 @@ export class DataGridComponent implements OnInit {
         private _audioService: AudioService,
         private _router: Router,
         private _snackBar: MatSnackBar,
-        private _walletService: WalletService
+        private _walletService: WalletService,
+        private _eventsService: EventsService
     ) {}
 
     ngOnInit(): void {
+        this._eventsService.playlistLoaded$.subscribe((rs) => {
+            this.playlists = rs;
+        })
         this.playlists = JSON.parse(localStorage.getItem('spotifire.playlists'));
     }
 

@@ -41,7 +41,7 @@
             <div class="mx-5 text-gray-300">
                 <div style="height: 42vh" class="w-full overflow-y-scroll scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-neutral-900">
                     <a class="block hover:text-white text-sx py-1" *ngFor="let playlist of playlists" 
-                    [routerLink]="['/playlist', playlist.id]" >{{ playlist.name }} </a>
+                    [routerLink]="['/playlist', playlist._id]" >{{ playlist.name }} </a>
                 </div>
             </div>
 

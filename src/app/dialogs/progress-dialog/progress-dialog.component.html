@@ -3,7 +3,7 @@
     <div class="my-4 w-96">
         <div *ngIf="data.isProcessed" >
             <div class="flex items-center justify-center mb-4">
-                <i class="material-icons text-8xl text-green-600">{{data.progressIcon}}</i>
+                <i class="material-icons text-8xl text-green-material">{{data.progressIcon}}</i>
             </div>
             <div class="flex items-center justify-center">
                 <!-- The upload process would be taken a little time. Please wait... -->
@@ -15,7 +15,7 @@
         </div>
         <div *ngIf="!data.isProcessed" class="">
             <div class="flex items-center justify-center mb-4">
-                <i class="material-icons text-8xl text-green-600">check_circle_outline</i>
+                <i class="material-icons text-8xl text-green-material">check_circle_outline</i>
             </div>
             <div class="flex items-center justify-center">
                 <div>{{data.doneMsg}}</div>

@@ -19,7 +19,7 @@ export class LikedSongsComponent implements OnInit {
         name: 'Liked Songs',
         description: null,
         thumbnailUrl: '/assets/images/liked-songs.jpg',
-        creator: '',
+        creator: this._walletService.getAddress(),
         songs: []
     };
 

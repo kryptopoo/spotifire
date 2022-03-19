@@ -85,8 +85,8 @@ export class UploadComponent implements OnInit, AfterViewInit {
         id3.fromFile(file).then((tags) => {
             // tags now contains v1, v2 and merged tags
             console.log(tags);
-            addSong.title = tags.title;
-            addSong.artist = tags.artist?.split(',').pop();
+            addSong.title = tags.title ? tags.title : '';
+            addSong.artist = tags.artist ? tags.artist?.split(',').pop() : '';
             //addSong.duration = tags.duration;
         });
     }
@@ -165,5 +165,13 @@ export class UploadComponent implements OnInit, AfterViewInit {
 
     connectWallet() {
         this.walletCompoment.openConnectDialog();
+    }
+
+    canUpload() {
+        var isValid = this.album.title != '' && this.album.thumbnailFile.file != null && this.album.genre != '' && this.album.artist != '';
+        this.album.songs.forEach((song) => {
+            if (song.title === '' || song.artist === '')  isValid = false
+        });
+        return isValid;
     }
 }

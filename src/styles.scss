@@ -8,8 +8,6 @@ body {
     color: whitesmoke;
     font-family: spotify-circular, Helvetica, Arial, sans-serif;
 }
-// html, body { height: 100%; }
-// body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 :root {
     --glue-font-weight-normal: 400;
@@ -91,6 +89,10 @@ body {
 
 .text-green-550 {
     color: rgb(29, 185, 84);
+}
+
+.text-green-material {
+    color: #69f0ae;
 }
 
 .snackbar-error {

@@ -71,7 +71,7 @@
             </div>
             <div class="flex items-end mb-3 ml-3">
                 <button mat-flat-button color="accent" class="w-44" (click)="upload()" 
-                    [disabled]="!album.title || !album.thumbnailFile.file || !album.genre || !album.artist">
+                    [disabled]="!canUpload()">
                     <i class="material-icons h-6 w-6 mr-1">cloud_upload</i>
                     Upload Album
                 </button>
